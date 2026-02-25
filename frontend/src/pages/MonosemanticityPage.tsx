@@ -13,7 +13,6 @@ import {
   Loader2,
   Layers,
   Zap,
-  Eye,
   BarChart3,
   GitCompare,
   Network,

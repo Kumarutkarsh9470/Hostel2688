@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   GitMerge,
@@ -627,7 +627,8 @@ function ModelCards({
       {order.map((k, i) => {
         const m = models[k];
         const ev = evaluation[k];
-        const c = colors[k] || "zinc";
+        const _c = colors[k] || "zinc";
+        void _c;
         return (
           <motion.div
             key={k}
@@ -946,12 +947,13 @@ function HeritageMap({ heritage: h }: { heritage: Heritage }) {
 /*  LIVE Heritage Probe                                                */
 /* ================================================================== */
 function HeritageProbe({
-  heritage,
+  heritage: _heritage,
   backendAvailable,
 }: {
   heritage: Heritage;
   backendAvailable: boolean;
 }) {
+  void _heritage;
   const [text, setText] = useState(
     "Le parlement européen a adopté la résolution.",
   );
@@ -1241,7 +1243,8 @@ function LiveGeneration({ backendAvailable }: { backendAvailable: boolean }) {
       {Object.keys(gens).length > 0 && (
         <div className="space-y-2">
           {Object.entries(gens).map(([name, text]) => {
-            const c = colors[name] || "zinc";
+            const _c2 = colors[name] || "zinc";
+            void _c2;
             return (
               <div
                 key={name}

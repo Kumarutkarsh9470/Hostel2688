@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -17,7 +17,6 @@ import {
   fadeUp,
   scaleUp,
   stagger,
-  cardInteraction,
 } from "../utils/motion";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -199,8 +198,6 @@ function HeroActivation() {
   const [tokens, setTokens] = useState<TokenGroup[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef(0);
-  const phaseRef = useRef(0);
 
   // Load hero token data (first 30 files covers ~5 tokens fully)
   useEffect(() => {
@@ -290,8 +287,6 @@ function HeroActivation() {
   }, [tokens, activeIdx]);
 
   if (tokens.length === 0) return null;
-
-  const token = tokens[activeIdx];
 
   return (
     <motion.div

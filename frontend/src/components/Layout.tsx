@@ -59,7 +59,9 @@ export function Layout() {
   useEffect(() => {
     startHealthPoll();
     const unsub = onBackendStatus(setBackendUp);
-    return () => { unsub(); };
+    return () => {
+      unsub();
+    };
   }, []);
 
   return (

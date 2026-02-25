@@ -12,12 +12,7 @@ import {
   ArrowRight,
   BookOpen,
 } from "lucide-react";
-import {
-  spring,
-  fadeUp,
-  scaleUp,
-  stagger,
-} from "../utils/motion";
+import { spring, fadeUp, scaleUp, stagger } from "../utils/motion";
 
 /* ═══════════════════════════════════════════════════════════════
    WIREFRAME TERRAIN — full-bleed green mesh hills

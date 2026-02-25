@@ -212,7 +212,7 @@ export function ArchitecturePage() {
   };
 
   return (
-    <div className="min-h-screen p-8" style={{ background: '#070D12' }}>
+    <div className="min-h-screen p-8" style={{ background: "#070D12" }}>
       {/* Loading overlay */}
       <AnimatePresence>
         {isLoading && (
@@ -221,11 +221,14 @@ export function ArchitecturePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
-            style={{ background: 'rgba(7,13,18,0.85)' }}
+            style={{ background: "rgba(7,13,18,0.85)" }}
           >
             <div className="flex flex-col items-center gap-4 max-w-md text-center">
               <div className="relative w-16 h-16">
-                <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: 'rgba(255,255,255,0.08)' }} />
+                <div
+                  className="absolute inset-0 rounded-full border-4"
+                  style={{ borderColor: "rgba(255,255,255,0.08)" }}
+                />
                 <div className="absolute inset-0 rounded-full border-4 border-t-[#00C896] border-r-transparent border-b-transparent border-l-transparent animate-spin" />
               </div>
               <p className="text-[#E2E8F0] text-sm font-medium">
@@ -277,9 +280,9 @@ export function ArchitecturePage() {
 
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ type: 'spring', stiffness: 120, damping: 18, mass: 0.9 }}
+        initial={{ opacity: 0, y: -20, filter: "blur(4px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.9 }}
         className="mb-8"
       >
         <h1 className="text-3xl font-bold mb-2 text-[#E2E8F0]">
@@ -341,8 +344,16 @@ export function ArchitecturePage() {
                         : "text-[#4A5568]"
                   }`}
                   style={{
-                    background: currentTokenIdx === idx ? '#00C896' : idx < currentTokenIdx ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-                    boxShadow: currentTokenIdx === idx ? '0 0 16px rgba(0,200,150,0.3)' : 'none',
+                    background:
+                      currentTokenIdx === idx
+                        ? "#00C896"
+                        : idx < currentTokenIdx
+                          ? "rgba(255,255,255,0.06)"
+                          : "rgba(255,255,255,0.03)",
+                    boxShadow:
+                      currentTokenIdx === idx
+                        ? "0 0 16px rgba(0,200,150,0.3)"
+                        : "none",
                   }}
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
@@ -361,7 +372,10 @@ export function ArchitecturePage() {
                 onClick={handlePrevToken}
                 disabled={currentTokenIdx === 0}
                 className="p-2 rounded-lg transition-all duration-200 disabled:opacity-30 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
                 title="Previous token"
               >
                 <SkipBack size={18} />
@@ -369,7 +383,10 @@ export function ArchitecturePage() {
               <button
                 onClick={handlePlayPause}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
                 title={isPlaying ? "Pause" : "Play (step-by-step)"}
               >
                 {isPlaying ? <Pause size={20} /> : <Play size={20} />}
@@ -377,7 +394,10 @@ export function ArchitecturePage() {
               <button
                 onClick={handleNextStep}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
                 title="Next step"
               >
                 <ChevronRight size={20} />
@@ -386,7 +406,10 @@ export function ArchitecturePage() {
                 onClick={handleNextToken}
                 disabled={currentTokenIdx >= numTokens - 1}
                 className="p-2 rounded-lg transition-all duration-200 disabled:opacity-30 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
                 title="Next token"
               >
                 <SkipForward size={18} />
@@ -394,7 +417,10 @@ export function ArchitecturePage() {
               <button
                 onClick={handleReset}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
                 title="Reset"
               >
                 <RotateCcw size={18} />
@@ -479,9 +505,17 @@ export function ArchitecturePage() {
                     : "text-[#6B7280]"
                 }`}
                 style={{
-                  background: currentLayer === i ? '#00C896' : 'rgba(255,255,255,0.04)',
-                  boxShadow: currentLayer === i ? '0 0 20px rgba(0,200,150,0.25)' : 'none',
-                  border: '1px solid ' + (currentLayer === i ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.06)'),
+                  background:
+                    currentLayer === i ? "#00C896" : "rgba(255,255,255,0.04)",
+                  boxShadow:
+                    currentLayer === i
+                      ? "0 0 20px rgba(0,200,150,0.25)"
+                      : "none",
+                  border:
+                    "1px solid " +
+                    (currentLayer === i
+                      ? "rgba(0,200,150,0.3)"
+                      : "rgba(255,255,255,0.06)"),
                 }}
               >
                 L{i}
@@ -492,33 +526,57 @@ export function ArchitecturePage() {
           {/* Sparsity indicator */}
           {currentFrameData && (
             <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div
+                className="p-4 rounded-lg"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
                 <div className="text-sm text-[#8B95A5] mb-1">X Sparsity</div>
                 <div className="text-2xl font-bold text-[#00C896]">
                   {(currentFrameData.x_sparsity * 100).toFixed(1)}%
                 </div>
-                <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <div
+                  className="mt-2 h-2 rounded-full overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.06)" }}
+                >
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: '#00C896', boxShadow: '0 0 8px rgba(0,200,150,0.4)' }}
+                    style={{
+                      background: "#00C896",
+                      boxShadow: "0 0 8px rgba(0,200,150,0.4)",
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${currentFrameData.x_sparsity * 100}%` }}
-                    transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 18 }}
                   />
                 </div>
               </div>
-              <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div
+                className="p-4 rounded-lg"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
                 <div className="text-sm text-[#8B95A5] mb-1">Y Sparsity</div>
                 <div className="text-2xl font-bold text-[#2A7FFF]">
                   {(currentFrameData.y_sparsity * 100).toFixed(1)}%
                 </div>
-                <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <div
+                  className="mt-2 h-2 rounded-full overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.06)" }}
+                >
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: '#2A7FFF', boxShadow: '0 0 8px rgba(42,127,255,0.4)' }}
+                    style={{
+                      background: "#2A7FFF",
+                      boxShadow: "0 0 8px rgba(42,127,255,0.4)",
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${currentFrameData.y_sparsity * 100}%` }}
-                    transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 18 }}
                   />
                 </div>
               </div>
@@ -569,7 +627,13 @@ function InsightCard({
   description: string;
 }) {
   return (
-    <div className="p-4 rounded-lg transition-all duration-300 hover:translate-y-[-2px]" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+    <div
+      className="p-4 rounded-lg transition-all duration-300 hover:translate-y-[-2px]"
+      style={{
+        background: "rgba(255,255,255,0.02)",
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
       <h4 className="font-medium text-[#00C896] mb-2">{title}</h4>
       <p className="text-sm text-[#8B95A5]">{description}</p>
     </div>
@@ -587,5 +651,7 @@ function LoadingTimer() {
     );
     return () => clearInterval(id);
   }, []);
-  return <p className="text-[#4A5568] text-xs font-mono">Elapsed: {elapsed}s</p>;
+  return (
+    <p className="text-[#4A5568] text-xs font-mono">Elapsed: {elapsed}s</p>
+  );
 }

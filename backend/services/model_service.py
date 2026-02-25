@@ -4,14 +4,12 @@ Model Service
 Handles loading, caching, and managing BDH model checkpoints.
 """
 
-from bdh import BDH, BDHConfig, ExtractionConfig, load_model
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-import threading
-
 import torch
-
+import threading
+from typing import Dict, List, Optional, Any
+from bdh import BDH, BDHConfig, ExtractionConfig, load_model
 import sys
+from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "training"))
 
 

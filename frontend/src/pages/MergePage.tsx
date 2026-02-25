@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   GitMerge,
@@ -125,6 +125,223 @@ const lossDisplay = (v: number | null) => (v === null ? "—" : v.toFixed(4));
 const API = "/api/merge";
 
 /* ================================================================== */
+/*  Training Evolution — side-by-side loss + sparsity curves           */
+/* ================================================================== */
+interface EvolutionRecord {
+  iteration: number;
+  loss: number;
+  sparsity: {
+    text_preview: string;
+    layers: Record<string, { x_sparsity: number; y_sparsity: number }>;
+    mean_x_sp: number;
+    mean_y_sp: number;
+  }[];
+}
+
+function TrainingEvolution() {
+  const [frData, setFrData] = useState<EvolutionRecord[]>([]);
+  const [ptData, setPtData] = useState<EvolutionRecord[]>([]);
+  const [tab, setTab] = useState<"loss" | "sparsity">("loss");
+
+  useEffect(() => {
+    fetch("/evolution/evolution_french.json")
+      .then((r) => r.json())
+      .then(setFrData)
+      .catch(() => {});
+    fetch("/evolution/evolution_portuguese.json")
+      .then((r) => r.json())
+      .then(setPtData)
+      .catch(() => {});
+  }, []);
+
+  const ready = frData.length > 0 && ptData.length > 0;
+  if (!ready) return null;
+
+  return (
+    <motion.div
+      className="glass-card p-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="w-5 h-5 text-[#8B95A5]" />
+          <h2 className="text-lg font-semibold text-[#E2E8F0]">
+            Training Evolution
+          </h2>
+        </div>
+        <div className="flex gap-1">
+          {(["loss", "sparsity"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="px-3 py-1 rounded text-xs font-medium transition-all"
+              style={{
+                background:
+                  tab === t ? "rgba(0,200,150,0.12)" : "rgba(255,255,255,0.03)",
+                color: tab === t ? "#00C896" : "#6B7280",
+                border: `1px solid ${tab === t ? "rgba(0,200,150,0.2)" : "rgba(255,255,255,0.06)"}`,
+              }}
+            >
+              {t === "loss" ? "Loss Curve" : "Sparsity"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="text-xs text-[#4A5568] mb-4">
+        How each specialist model trained before being merged.
+      </p>
+      {tab === "loss" ? (
+        <EvolutionChart frData={frData} ptData={ptData} mode="loss" />
+      ) : (
+        <EvolutionChart frData={frData} ptData={ptData} mode="sparsity" />
+      )}
+      <div className="flex items-center gap-5 mt-3 text-[10px] text-[#6B7280]">
+        <span className="flex items-center gap-1.5">
+          <span
+            className="inline-block w-3 h-0.5 rounded"
+            style={{ background: "#00C896" }}
+          />
+          French
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className="inline-block w-3 h-0.5 rounded"
+            style={{ background: "#38BDF8" }}
+          />
+          Portuguese
+        </span>
+      </div>
+    </motion.div>
+  );
+}
+
+function EvolutionChart({
+  frData,
+  ptData,
+  mode,
+}: {
+  frData: EvolutionRecord[];
+  ptData: EvolutionRecord[];
+  mode: "loss" | "sparsity";
+}) {
+  const W = 700,
+    H = 200,
+    PAD = { t: 10, r: 10, b: 25, l: 50 };
+  const chartW = W - PAD.l - PAD.r;
+  const chartH = H - PAD.t - PAD.b;
+
+  const getValue = (r: EvolutionRecord): number => {
+    if (mode === "loss") return Math.log10(Math.max(r.loss, 0.01));
+    // average x_sparsity across layers
+    if (!r.sparsity || r.sparsity.length === 0) return 0;
+    return r.sparsity[0].mean_x_sp ?? 0;
+  };
+
+  const allVals = [...frData, ...ptData].map(getValue);
+  const minV = Math.min(...allVals);
+  const maxV = Math.max(...allVals);
+  const range = maxV - minV || 1;
+
+  const maxIter = Math.max(
+    frData[frData.length - 1]?.iteration ?? 1,
+    ptData[ptData.length - 1]?.iteration ?? 1,
+  );
+
+  const toPath = (data: EvolutionRecord[]) => {
+    return data
+      .map((r, i) => {
+        const x = PAD.l + (r.iteration / maxIter) * chartW;
+        const y = PAD.t + chartH - ((getValue(r) - minV) / range) * chartH;
+        return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+  };
+
+  // Y-axis labels
+  const yTicks = 4;
+  const yLabels = Array.from({ length: yTicks + 1 }, (_, i) => {
+    const v = minV + (range * i) / yTicks;
+    if (mode === "loss") return Math.pow(10, v).toFixed(v > 2 ? 0 : 2);
+    return (v * 100).toFixed(0) + "%";
+  });
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="w-full"
+      style={{ maxHeight: 220 }}
+    >
+      {/* Grid lines */}
+      {Array.from({ length: yTicks + 1 }, (_, i) => {
+        const y = PAD.t + chartH - (chartH * i) / yTicks;
+        return (
+          <g key={i}>
+            <line
+              x1={PAD.l}
+              x2={W - PAD.r}
+              y1={y}
+              y2={y}
+              stroke="rgba(255,255,255,0.04)"
+              strokeWidth={0.5}
+            />
+            <text
+              x={PAD.l - 4}
+              y={y + 3}
+              textAnchor="end"
+              fill="#4A5568"
+              fontSize={8}
+              fontFamily="monospace"
+            >
+              {yLabels[i]}
+            </text>
+          </g>
+        );
+      })}
+      {/* X-axis labels */}
+      {[0, 0.25, 0.5, 0.75, 1].map((pct) => {
+        const x = PAD.l + pct * chartW;
+        const iter = Math.round(pct * maxIter);
+        return (
+          <text
+            key={pct}
+            x={x}
+            y={H - 4}
+            textAnchor="middle"
+            fill="#4A5568"
+            fontSize={8}
+            fontFamily="monospace"
+          >
+            {iter >= 1000 ? `${(iter / 1000).toFixed(0)}k` : iter}
+          </text>
+        );
+      })}
+      {/* French line */}
+      <path
+        d={toPath(frData)}
+        fill="none"
+        stroke="#00C896"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.8}
+      />
+      {/* Portuguese line */}
+      <path
+        d={toPath(ptData)}
+        fill="none"
+        stroke="#38BDF8"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.8}
+      />
+    </svg>
+  );
+}
+
+/* ================================================================== */
 /*  Main                                                               */
 /* ================================================================== */
 export function MergePage() {
@@ -136,7 +353,8 @@ export function MergePage() {
     // Try new merge_eval.json first, fall back to old merge_data.json
     fetch("/merge/merge_eval.json")
       .then((r) => {
-        if (!r.ok) return fetch("/merge/merge_data.json").then((r2) => r2.json());
+        if (!r.ok)
+          return fetch("/merge/merge_data.json").then((r2) => r2.json());
         return r.json();
       })
       .then((raw) => {
@@ -195,6 +413,7 @@ export function MergePage() {
       {h && models && (
         <MergeDiagram heritage={h} models={models} hasFT={hasFT} />
       )}
+      <TrainingEvolution />
       {models && ev && <ModelCards models={models} evaluation={ev} />}
       {hasEval && <LossComparison evaluation={ev!} hasFT={!!hasFT} />}
       {ftInfo && <FinetuneInfoPanel info={ftInfo} />}

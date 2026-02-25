@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -54,6 +54,7 @@ const navItems = [
 
 export function Layout() {
   const [backendUp, setBackendUp] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     startHealthPoll();
@@ -76,16 +77,9 @@ export function Layout() {
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
           <NavLink to="/" className="flex items-center gap-3 group">
-            <motion.span
-              className="text-xl"
-              whileHover={{ rotate: 12, scale: 1.1 }}
-              transition={spring.bouncy}
-            >
-              🐉
-            </motion.span>
             <div>
               <h1 className="font-semibold text-[#E2E8F0] text-sm tracking-tight">
-                BDH Suite
+                BDH
               </h1>
               <p className="text-[10px] text-[#4A5568] tracking-wider uppercase">
                 Neural Observatory
@@ -208,7 +202,18 @@ export function Layout() {
 
         {/* Page content — each page handles its own entry animation */}
         <div className="flex-1" style={{ minHeight: 0 }}>
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="h-full"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>

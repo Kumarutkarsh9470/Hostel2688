@@ -4,15 +4,14 @@ Inference API Routes
 Endpoints for running inference with activation extraction.
 """
 
-from bdh import ExtractionConfig
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
 import torch
-
+from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException, Request
+from typing import List, Optional, Dict, Any
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "training"))
+from bdh import ExtractionConfig
 
 
 router = APIRouter()

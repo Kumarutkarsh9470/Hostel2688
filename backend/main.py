@@ -13,24 +13,32 @@ The frontend can work in two modes:
 2. Playback mode: Uses pre-computed JSON (no backend needed)
 """
 
+import torch
+from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+from contextlib import asynccontextmanager
+from typing import Dict, List, Optional, Any
+from pathlib import Path
 import os
+import sys
 
 # Fix OpenBLAS memory allocation errors on Windows
 # Must be set BEFORE importing numpy/torch
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-import torch
+# Add training/ to sys.path so `from bdh import ...` works everywhere
+# MUST happen BEFORE importing routes, since they do `from bdh import ...`
+_training_dir = str(Path(__file__).parent.parent / "training")
+if _training_dir not in sys.path:
+    sys.path.insert(0, _training_dir)
 
-# Import routes
+
+# Import routes (after sys.path is set up)
 from backend.routes import inference, analysis, models, visualization, graph as graph_routes
+from backend.routes import sparsity as sparsity_routes
 try:
     from backend.routes import merge_api as merge_routes
 except ImportError:
@@ -42,26 +50,33 @@ except ImportError:
 # Get the project root directory (parent of backend/)
 _PROJECT_ROOT = Path(__file__).parent.parent
 
+
 class Settings:
     """Application settings."""
     PROJECT_NAME: str = "BDH Interpretability Suite"
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
-    
+
     # Model paths - resolve relative to project root
-    CHECKPOINT_DIR: Path = Path(os.getenv("CHECKPOINT_DIR", str(_PROJECT_ROOT / "checkpoints")))
+    CHECKPOINT_DIR: Path = Path(
+        os.getenv("CHECKPOINT_DIR", str(_PROJECT_ROOT / "checkpoints")))
     DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "french")
-    
+
     # Device
-    DEVICE: str = os.getenv("DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
-    
+    DEVICE: str = os.getenv(
+        "DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
+
     # CORS
     CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",  # Vite dev server
-        "http://localhost:5174",  # Alternative Vite port
+        "https://bdh-pathway.vercel.app",  # Vercel production
+        "https://*.vercel.app",            # Vercel preview deploys
+        "https://kumarutkarsh9263-backend.hf.space",  # HF Space itself
+        "http://localhost:5173",           # Vite dev server
+        "http://localhost:5174",           # Alternative Vite port
         "http://localhost:3000",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
+        "*",                               # Allow all origins (for debugging)
     ]
 
 
@@ -81,27 +96,27 @@ async def lifespan(app: FastAPI):
     print("=" * 60)
     print(f"Device: {settings.DEVICE}")
     print(f"Checkpoint dir: {settings.CHECKPOINT_DIR}")
-    
+
     # Initialize model registry
     from backend.services.model_service import ModelService
     app.state.model_service = ModelService(
         checkpoint_dir=settings.CHECKPOINT_DIR,
         device=settings.DEVICE
     )
-    
+
     # Try to load default model
     try:
         app.state.model_service.load_model(settings.DEFAULT_MODEL)
         print(f"Loaded default model: {settings.DEFAULT_MODEL}")
     except Exception as e:
         print(f"Warning: Could not load default model: {e}")
-    
+
     print("=" * 60)
     print("[READY] Server ready!")
     print("=" * 60)
-    
+
     yield
-    
+
     # Shutdown
     print("\n[SHUTDOWN] Shutting down...")
     app.state.model_service.unload_all()
@@ -171,9 +186,14 @@ app.include_router(
     tags=["visualization"]
 )
 app.include_router(
-    graph_routes.router, 
+    graph_routes.router,
     prefix=f"{settings.API_PREFIX}/graph",
-      tags=["graph"])
+    tags=["graph"])
+
+app.include_router(
+    sparsity_routes.router,
+    prefix=f"{settings.API_PREFIX}/sparsity",
+    tags=["sparsity"])
 
 if merge_routes:
     app.include_router(
@@ -213,7 +233,7 @@ async def health():
 async def api_status():
     """API status with loaded models."""
     model_service = app.state.model_service
-    
+
     return {
         "status": "running",
         "loaded_models": model_service.list_loaded_models(),

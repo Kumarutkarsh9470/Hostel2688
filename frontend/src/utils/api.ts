@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_BASE = "/api";
+// In production VITE_API_URL points to the HF Space backend;
+// in dev it's empty so Vite's proxy handles /api → localhost:8000
+const API_ORIGIN = import.meta.env.VITE_API_URL || "";
+const API_BASE = `${API_ORIGIN}/api`;
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -36,7 +39,7 @@ export function startHealthPoll() {
   _polling = true;
   const poll = async () => {
     try {
-      await axios.get("/health", { timeout: 4000 });
+      await axios.get(`${API_ORIGIN}/health`, { timeout: 4000 });
       _setConnected(true);
     } catch {
       _setConnected(false);
@@ -170,7 +173,7 @@ export async function loadPlaybackJSON(filename: string) {
 // Health check (hits root /health, NOT /api/health)
 export const health = () => axios.get("/health", { timeout: 4000 });
 
- // Graph Brain endpoints
+// Graph Brain endpoints
 export const graph = {
   getClusters: (modelName: string, head = 0, beta = 1.0, maxNodes = 400) =>
     api.get(`/graph/clusters/${modelName}`, {
@@ -184,9 +187,7 @@ export const graph = {
       model_name: modelName,
       head,
       layer,
-     }),
+    }),
 
   clearCache: () => api.delete("/graph/cache"),
- };
-
-
+};

@@ -133,8 +133,18 @@ interface PrecomputedData {
 const PRESETS = [
   { id: "currency", name: "Currency", icon: "\u{1F4B0}", color: "#34d399" },
   { id: "country", name: "Country", icon: "\u{1F30D}", color: "#60a5fa" },
-  { id: "institution", name: "Institution", icon: "\u{1F3DB}\uFE0F", color: "#c084fc" },
-  { id: "action_verb", name: "Action Verb", icon: "\u{26A1}", color: "#fbbf24" },
+  {
+    id: "institution",
+    name: "Institution",
+    icon: "\u{1F3DB}\uFE0F",
+    color: "#c084fc",
+  },
+  {
+    id: "action_verb",
+    name: "Action Verb",
+    icon: "\u{26A1}",
+    color: "#fbbf24",
+  },
 ];
 
 const CONCEPT_COLORS: Record<string, string> = {
@@ -2409,6 +2419,29 @@ function MonosemanticNeuronPanel({
   words: string[];
   conceptName: string;
 }) {
+  const [sortBy, setSortBy] = useState<
+    "selectivity" | "p_value" | "mean_in" | "neuron"
+  >("selectivity");
+
+  const sortedNeurons = useMemo(() => {
+    if (!neurons || neurons.length === 0) return [];
+    const copy = [...neurons];
+    switch (sortBy) {
+      case "selectivity":
+        return copy.sort((a, b) => b.selectivity - a.selectivity);
+      case "p_value":
+        return copy.sort((a, b) => a.p_value - b.p_value);
+      case "mean_in":
+        return copy.sort((a, b) => b.mean_in - a.mean_in);
+      case "neuron":
+        return copy.sort(
+          (a, b) => a.layer - b.layer || a.head - b.head || a.neuron - b.neuron,
+        );
+      default:
+        return copy;
+    }
+  }, [neurons, sortBy]);
+
   if (!neurons || neurons.length === 0) {
     return (
       <motion.div
@@ -2441,6 +2474,16 @@ function MonosemanticNeuronPanel({
         <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-[#CBD5E0] font-mono">
           {neurons.length} found
         </span>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          className="ml-auto text-[10px] px-2 py-1 rounded bg-[#0B1216] border border-white/[0.08] text-[#8B95A5] outline-none cursor-pointer"
+        >
+          <option value="selectivity">Sort: Selectivity</option>
+          <option value="p_value">Sort: p-value</option>
+          <option value="mean_in">Sort: Mean activation</option>
+          <option value="neuron">Sort: Location</option>
+        </select>
       </div>
       <p className="text-xs text-[#4A5568] mb-3">
         Selective neurons for{" "}
@@ -2470,7 +2513,7 @@ function MonosemanticNeuronPanel({
             </tr>
           </thead>
           <tbody>
-            {neurons.slice(0, 20).map((n, i) => (
+            {sortedNeurons.slice(0, 20).map((n, i) => (
               <motion.tr
                 key={`${n.layer}-${n.head}-${n.neuron}`}
                 className="border-b border-white/[0.06] hover:bg-white/\[0.02\]"

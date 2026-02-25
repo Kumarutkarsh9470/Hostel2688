@@ -12,10 +12,10 @@ import { LearnBDHPage } from "./pages/LearnBDHPage";
 
 // Lazy-load 3D-heavy pages to isolate Three.js and prevent app-wide crashes
 const GraphPage = lazy(() =>
-  import("./pages/GraphPage").then((m) => ({ default: m.GraphPage }))
+  import("./pages/GraphPage").then((m) => ({ default: m.GraphPage })),
 );
 const GraphTest = lazy(() =>
-  import("./pages/GraphTest").then((m) => ({ default: m.GraphTest }))
+  import("./pages/GraphTest").then((m) => ({ default: m.GraphTest })),
 );
 
 function Loading() {

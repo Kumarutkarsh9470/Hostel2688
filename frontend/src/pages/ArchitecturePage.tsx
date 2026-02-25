@@ -280,8 +280,8 @@ export function ArchitecturePage() {
 
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20, filter: "blur(4px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.9 }}
         className="mb-8"
       >

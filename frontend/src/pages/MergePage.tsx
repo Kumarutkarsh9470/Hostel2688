@@ -362,7 +362,11 @@ export function MergePage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-    fetch("/health")
+    const apiOrigin =
+      (typeof import.meta !== "undefined" &&
+        import.meta.env?.VITE_API_URL) ||
+      "";
+    fetch(`${apiOrigin}/health`)
       .then((r) => (r.ok ? setBackendAvailable(true) : null))
       .catch(() => {});
   }, []);

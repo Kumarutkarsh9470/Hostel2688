@@ -704,10 +704,22 @@ export function GraphPage() {
             />
           ) : (
             !loading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-gray-700 text-[10px]">
-                  No data — start the backend
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <AlertCircle className="w-8 h-8 text-[#4A5568]" />
+                <p className="text-[#8B95A5] text-sm font-medium">
+                  {error || "No graph data available"}
                 </p>
+                <p className="text-[#4A5568] text-xs max-w-xs text-center">
+                  The Graph Brain requires the backend to compute neuron
+                  clusters. Start it with:{" "}
+                  <code className="text-[#00C896] text-[11px]">uvicorn backend.main:app --reload</code>
+                </p>
+                <button
+                  onClick={() => load(head, beta)}
+                  className="mt-2 px-4 py-1.5 bg-[#00C896]/10 border border-[#00C896]/20 text-[#00C896] text-xs rounded-lg hover:bg-[#00C896]/20 transition-colors"
+                >
+                  Retry
+                </button>
               </div>
             )
           )}

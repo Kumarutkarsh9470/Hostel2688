@@ -995,10 +995,11 @@ function NeuronHeatmap({
 }: {
   concepts: Record<string, ConceptData>;
 }) {
+  if (!concepts || typeof concepts !== "object") return null;
   return (
     <div className="space-y-4">
       {Object.entries(concepts).map(([cat, data]) => {
-        const neurons = data.monosemantic_neurons.slice(0, 12);
+        const neurons = (data.monosemantic_neurons ?? []).slice(0, 12);
         return (
           <div key={cat}>
             <div className="text-xs text-[#8B95A5] uppercase tracking-wider mb-1.5">
@@ -1072,21 +1073,31 @@ export function FindingsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/monosemanticity/precomputed.json").then((r) => r.json()),
+      fetch("/monosemanticity/precomputed.json").then((r) => {
+        if (!r.ok) throw new Error(`precomputed.json: ${r.status}`);
+        return r.json();
+      }),
       fetch("/merge/merge_eval.json")
-        .then((r) => { if (!r.ok) return fetch("/merge/merge_data.json").then((r2) => r2.json()); return r.json(); }),
+        .then((r) => {
+          if (!r.ok) return fetch("/merge/merge_data.json").then((r2) => {
+            if (!r2.ok) throw new Error(`merge data: ${r2.status}`);
+            return r2.json();
+          });
+          return r.json();
+        }),
     ])
       .then(([monoRaw, mergeRaw]) => {
         setMonoData(adaptMonoData(monoRaw) as unknown as PrecomputedData);
         setMergeData(adaptMergeData(mergeRaw) as unknown as MergeData);
       })
+      .catch((err) => console.error("FindingsPage data load failed:", err))
       .finally(() => setLoading(false));
   }, []);
 
   // Set default tracking category
   useEffect(() => {
     if (monoData && !activeTrackCat) {
-      const cats = Object.keys(monoData.synapse_tracking);
+      const cats = Object.keys(monoData.synapse_tracking ?? {});
       if (cats.length) setActiveTrackCat(cats[0]);
     }
   }, [monoData, activeTrackCat]);
@@ -1107,10 +1118,10 @@ export function FindingsPage() {
     );
   }
 
-  const sel = monoData.selectivity;
+  const sel = monoData.selectivity ?? { histogram: [], total_neurons: 0, total_selective: 0, mean_selectivity: 0 };
   const ft = mergeData.finetune_info;
   const probe = mergeData.heritage_probe?.summary;
-  const nCats = Object.keys(monoData.concepts).length;
+  const nCats = Object.keys(monoData.concepts ?? {}).length;
   const nLayers = monoData.model_info.n_layers;
   const trackingCats = Object.keys(monoData.synapse_tracking ?? {});
 

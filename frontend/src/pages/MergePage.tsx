@@ -16,9 +16,6 @@ import {
 } from "lucide-react";
 import { adaptMergeData } from "../utils/dataAdapters";
 
-/* ================================================================== */
-/*  Types                                                              */
-/* ================================================================== */
 interface ModelInfo {
   name: string;
   flag: string;
@@ -96,9 +93,6 @@ interface LayerHeritage {
   activation_ratio: number;
 }
 
-/* ================================================================== */
-/*  Helpers                                                            */
-/* ================================================================== */
 const fmtP = (n: number) =>
   n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : `${(n / 1e3).toFixed(0)}K`;
 const fmtN = (n: number) => n.toLocaleString();
@@ -115,9 +109,6 @@ const API_ORIGIN =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) || "";
 const API = `${API_ORIGIN}/api/merge`;
 
-/* ================================================================== */
-/*  Training Evolution — side-by-side loss + sparsity curves           */
-/* ================================================================== */
 interface EvolutionRecord {
   iteration: number;
   loss: number;
@@ -332,9 +323,6 @@ function EvolutionChart({
   );
 }
 
-/* ================================================================== */
-/*  Main                                                               */
-/* ================================================================== */
 export function MergePage() {
   const [data, setData] = useState<MergeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -427,9 +415,6 @@ export function MergePage() {
   );
 }
 
-/* ================================================================== */
-/*  Merge Diagram                                                      */
-/* ================================================================== */
 function MergeDiagram({
   heritage: h,
   models,
@@ -601,9 +586,6 @@ function MergeDiagram({
   );
 }
 
-/* ================================================================== */
-/*  Model Cards                                                        */
-/* ================================================================== */
 function ModelCards({
   models,
   evaluation,
@@ -688,9 +670,6 @@ function Row({
   );
 }
 
-/* ================================================================== */
-/*  Loss Comparison                                                    */
-/* ================================================================== */
 function LossComparison({
   evaluation,
   hasFT,
@@ -787,9 +766,6 @@ function LossComparison({
   );
 }
 
-/* ================================================================== */
-/*  Sample Generations                                                 */
-/* ================================================================== */
 function SampleGenerations({ samples }: { samples: Sample[] }) {
   const [selected, setSelected] = useState(0);
   const s = samples[selected];
@@ -869,9 +845,6 @@ function SampleGenerations({ samples }: { samples: Sample[] }) {
   );
 }
 
-/* ================================================================== */
-/*  Heritage Map                                                       */
-/* ================================================================== */
 function HeritageMap({ heritage: h }: { heritage: Heritage }) {
   const segs = 120;
   const split = segs / 2;
@@ -941,9 +914,6 @@ function HeritageMap({ heritage: h }: { heritage: Heritage }) {
   );
 }
 
-/* ================================================================== */
-/*  LIVE Generation                                                    */
-/* ================================================================== */
 function LiveGeneration({ backendAvailable }: { backendAvailable: boolean }) {
   const [prompt, setPrompt] = useState(
     "Le commerce international est essentiel pour",
@@ -1072,9 +1042,6 @@ function LiveGeneration({ backendAvailable }: { backendAvailable: boolean }) {
   );
 }
 
-/* ================================================================== */
-/*  Fine-tune Info Panel                                               */
-/* ================================================================== */
 function FinetuneInfoPanel({ info }: { info: FinetuneInfo }) {
   const reduction = ((1 - info.post_loss / info.pre_loss) * 100).toFixed(1);
   return (
@@ -1154,9 +1121,6 @@ function FinetuneInfoPanel({ info }: { info: FinetuneInfo }) {
   );
 }
 
-/* ================================================================== */
-/*  Precomputed Heritage Probe                                         */
-/* ================================================================== */
 function PrecomputedHeritageProbe({
   probe,
   heritage,
@@ -1355,9 +1319,6 @@ function PrecomputedHeritageProbe({
   );
 }
 
-/* ================================================================== */
-/*  Insight Panel                                                      */
-/* ================================================================== */
 function InsightPanel({ hasFT }: { hasFT: boolean }) {
   return (
     <motion.div

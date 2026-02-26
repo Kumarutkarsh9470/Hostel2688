@@ -1,18 +1,3 @@
-/**
- * Data Adapters
- *
- * Transforms the new precomputed visualization data formats into the shapes
- * expected by the existing frontend components.
- *
- * New data comes from updated training pipeline with different output schemas.
- * These adapters bridge the gap so existing visualizations continue to work.
- */
-
-/* ================================================================== */
-/*  Monosemanticity data adapter                                       */
-/* ================================================================== */
-
-/** Shape of the NEW precomputed.json from updated pipeline */
 export interface NewPrecomputedData {
   concepts: string[];
   analysis_layer: number;
@@ -37,7 +22,6 @@ export interface NewFingerprint {
   mean_sel: number;
 }
 
-/** Shape expected by MonosemanticityPage (old format) */
 export interface OldPrecomputedData {
   model_info: { n_layers: number; n_heads: number; n_neurons: number };
   best_layer: number;
@@ -318,16 +302,10 @@ export function adaptMonoData(raw: unknown): OldPrecomputedData {
       total_selective: totalSelective,
       mean_selectivity: meanSelectivity,
     },
-    // No synapse tracking in new format — leave undefined
     synapse_tracking: undefined,
   };
 }
 
-/* ================================================================== */
-/*  Merge data adapter                                                 */
-/* ================================================================== */
-
-/** New merge_eval.json format */
 interface NewMergeData {
   evaluation: {
     merged: {
@@ -345,7 +323,6 @@ interface NewMergeData {
   samples: { prompt: string; output: string }[];
 }
 
-/** Old merge_data.json format expected by MergePage */
 export interface OldMergeData {
   heritage: {
     model1_name: string;
@@ -470,7 +447,9 @@ export function adaptMergeData(raw: unknown): OldMergeData {
       },
     },
     samples: data.samples.map((s) => ({
-      label: s.prompt.includes("<T:fr>") ? "French prompt" : "Portuguese prompt",
+      label: s.prompt.includes("<T:fr>")
+        ? "French prompt"
+        : "Portuguese prompt",
       prompt: s.prompt,
       merged_generated: s.output,
     })),

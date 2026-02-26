@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
-"""
-Monosemanticity Analysis for BDH
-
-This module discovers and validates monosemantic synapses in BDH models.
-A monosemantic synapse consistently activates for a specific semantic concept
-(like "currency" or "country") and NOT for unrelated concepts.
-
-Based on BDH paper Section 6.3 which demonstrates "currency synapses" and other
-concept-specific activations.
-"""
+"""Monosemanticity analysis — discovers concept-specific synapses in BDH models."""
 
 import argparse
 import json
@@ -26,10 +17,6 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "training"))
 from bdh import BDH, BDHConfig, ExtractionConfig, load_model
 
-
-# =============================================================================
-# CONCEPT DEFINITIONS
-# =============================================================================
 
 CONCEPT_CATEGORIES = {
     "currencies": {

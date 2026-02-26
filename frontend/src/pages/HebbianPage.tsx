@@ -19,9 +19,6 @@ import {
 } from "lucide-react";
 import { visualization } from "../utils/api";
 
-/* ================================================================== */
-/*  Types — matches new backend /hebbian-track response                */
-/* ================================================================== */
 interface Prediction {
   byte: number;
   char: string;
@@ -82,9 +79,6 @@ interface HebbianResponse {
   sparsity: Record<string, number>;
 }
 
-/* ================================================================== */
-/*  Constants                                                          */
-/* ================================================================== */
 const HEAD_COLORS = ["#8b5cf6", "#f59e0b", "#06b6d4", "#ef4444"];
 const LAYER_GRADIENT = [
   "#4f46e5",
@@ -104,9 +98,6 @@ const EXAMPLE_SENTENCES = [
   "il parle couramment français et anglais depuis toujours",
 ];
 
-/* ================================================================== */
-/*  Component                                                          */
-/* ================================================================== */
 export function HebbianPage() {
   const [inputText, setInputText] = useState(EXAMPLE_SENTENCES[0]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -120,7 +111,6 @@ export function HebbianPage() {
   const [expandedLayer, setExpandedLayer] = useState<number | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState(1800); // ms per word
 
-  /* ── Current head data ── */
   const headData = useMemo((): HeadData | null => {
     if (!data) return null;
     const layerData = data.layer_data[selectedLayer];
@@ -128,7 +118,6 @@ export function HebbianPage() {
     return layerData[selectedHead] ?? null;
   }, [data, selectedLayer, selectedHead]);
 
-  /* ── Available layers ── */
   const availableLayers = useMemo(() => {
     if (!data) return [];
     return Object.keys(data.layer_data)
@@ -136,13 +125,11 @@ export function HebbianPage() {
       .sort((a, b) => a - b);
   }, [data]);
 
-  /* ── Max gate activity (for scaling bars) ── */
   const maxGate = useMemo(() => {
     if (!headData) return 1;
     return Math.max(...headData.words.map((w) => Math.abs(w.gate_activity)), 1);
   }, [headData]);
 
-  /* ── Max sigma/delta for current synapses ── */
   const maxSigma = useMemo(() => {
     if (!headData) return 1;
     let max = 0;
@@ -155,7 +142,6 @@ export function HebbianPage() {
     return max || 1;
   }, [headData, showDelta]);
 
-  /* ── Fetch from model ── */
   const runAnalysis = useCallback(async () => {
     if (!inputText.trim()) return;
     setLoading(true);
@@ -189,7 +175,6 @@ export function HebbianPage() {
     }
   }, [inputText]);
 
-  /* ── Playback ── */
   useEffect(() => {
     if (!isPlaying || !headData) return;
     const interval = setInterval(() => {
@@ -209,7 +194,7 @@ export function HebbianPage() {
 
   return (
     <div className="min-h-screen p-8" style={{ background: '#070D12' }}>
-      {/* ── Header ── */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -225,7 +210,7 @@ export function HebbianPage() {
         </p>
       </motion.div>
 
-      {/* ── Input ── */}
+      {/* Input */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -492,10 +477,10 @@ export function HebbianPage() {
         )}
       </motion.div>
 
-      {/* ── Main panels ── */}
+      {/* Main panels */}
       {data && headData && (
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
-          {/* ── LEFT: σ Timeline ── */}
+          {/* LEFT: σ Timeline */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -615,7 +600,7 @@ export function HebbianPage() {
             </div>
           </motion.div>
 
-          {/* ── RIGHT: Prediction Shift + Layer Summary ── */}
+          {/* RIGHT: Prediction Shift + Layer Summary */}
           <div className="space-y-6">
             {/* Before/After Predictions */}
             <motion.div
@@ -842,7 +827,7 @@ export function HebbianPage() {
         </div>
       )}
 
-      {/* ── Gate Activity Heatmap ── */}
+      {/* Gate Activity Heatmap */}
       {data && headData && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -892,7 +877,7 @@ export function HebbianPage() {
         </motion.div>
       )}
 
-      {/* ── Animated Hero (shown before analysis) ── */}
+      {/* Animated Hero (shown before analysis) */}
       {!data && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -1122,7 +1107,7 @@ export function HebbianPage() {
         </motion.div>
       )}
 
-      {/* ── Compact Explainer (shown after analysis, collapsed) ── */}
+      {/* Compact Explainer (shown after analysis, collapsed) */}
       {data && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}

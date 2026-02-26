@@ -1,23 +1,5 @@
 #!/usr/bin/env python3
-"""
-BDH Training Script for Europarl Translation
-
-Trains BDH models on Europarl parallel corpus for:
-- French specialist (en-fr)
-- Portuguese specialist (en-pt)
-- Later: merge both into polyglot model
-
-Features:
-- Mixed precision training (bfloat16/float16)
-- Gradient accumulation for large effective batch sizes
-- Periodic checkpointing with extraction snapshots
-- Wandb logging (optional)
-- Google Colab compatible
-
-Usage:
-    python train.py --config configs/french.yaml
-    python train.py --data data/en-fr/train.bin --name french_specialist
-"""
+"""BDH training script. Usage: python train.py --config configs/french.yaml"""
 
 import argparse
 import os

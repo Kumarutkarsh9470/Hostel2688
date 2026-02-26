@@ -1,8 +1,4 @@
-"""
-Inference API Routes
-
-Endpoints for running inference with activation extraction.
-"""
+"""Inference API routes."""
 
 import torch
 from pydantic import BaseModel, Field
@@ -15,12 +11,6 @@ from bdh import ExtractionConfig
 
 
 router = APIRouter()
-
-
-# =============================================================================
-# REQUEST/RESPONSE MODELS
-# =============================================================================
-
 class InferenceRequest(BaseModel):
     """Request for model inference."""
     text: str = Field(..., description="Input text to process")
@@ -72,12 +62,6 @@ class GenerateResponse(BaseModel):
     generated: str
     full_text: str
     num_tokens_generated: int
-
-
-# =============================================================================
-# ENDPOINTS
-# =============================================================================
-
 @router.post("/run", response_model=InferenceResponse)
 def run_inference(request: InferenceRequest, req: Request):
     """

@@ -15,10 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/        backend/
 COPY training/bdh.py training/bdh.py
 
-# ── Checkpoints ──
-# On HF Spaces, checkpoints land inside backend/checkpoints/ after COPY.
-# The Python code expects them at /app/checkpoints/.
-# Create a symlink so both paths resolve to the same files.
+# Symlink so /app/checkpoints resolves to backend/checkpoints (HF Spaces layout)
 RUN ln -sfn /app/backend/checkpoints /app/checkpoints
 
 # HuggingFace Spaces requires port 7860

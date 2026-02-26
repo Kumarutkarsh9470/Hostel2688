@@ -1,23 +1,10 @@
-"""
-Models API Routes
-
-Endpoints for model management:
-- List available models
-- Load/unload models
-- Get model info
-"""
+"""Model management routes."""
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 router = APIRouter()
-
-
-# =============================================================================
-# REQUEST/RESPONSE MODELS
-# =============================================================================
-
 class ModelInfo(BaseModel):
     """Information about a model."""
     name: str
@@ -30,12 +17,6 @@ class LoadModelRequest(BaseModel):
     """Request to load a model."""
     model_name: str
     checkpoint_path: Optional[str] = None
-
-
-# =============================================================================
-# ENDPOINTS
-# =============================================================================
-
 @router.get("/list")
 async def list_models(req: Request):
     """

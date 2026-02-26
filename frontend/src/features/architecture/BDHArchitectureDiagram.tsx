@@ -1,10 +1,6 @@
 import { useEffect, useState, useId, useMemo } from "react";
 import { motion } from "framer-motion";
 
-// =============================================================================
-// DATA INTERFACES
-// =============================================================================
-
 interface FrameData {
   token_idx: number;
   token_char: string;
@@ -98,10 +94,6 @@ interface Props {
   onBlockClick?: (step: number) => void;
 }
 
-// =============================================================================
-// CONSTANTS
-// =============================================================================
-
 const STEPS = [
   { id: 0, name: "Input Token", key: "input" },
   { id: 1, name: "Embedding", key: "embedding" },
@@ -118,11 +110,6 @@ const STEPS = [
   { id: 12, name: "Output", key: "output" },
 ] as const;
 
-// =============================================================================
-// COLOR UTILITIES
-// =============================================================================
-
-/** Blue (negative) → dark → red/orange (positive) */
 function divergingColor(v: number, maxAbs: number): string {
   const norm = maxAbs > 0 ? v / maxAbs : 0;
   if (norm < 0) {
@@ -133,7 +120,6 @@ function divergingColor(v: number, maxAbs: number): string {
   return `rgb(${Math.round(60 + t * 195)}, ${Math.round(30 + t * 60)}, ${Math.round(20)})`;
 }
 
-/** Dark → bright cyan for attention/ρ values */
 function rhoColor(v: number, maxAbs: number): string {
   if (maxAbs <= 0) return "#0F172A";
   const norm = v / maxAbs;
@@ -145,7 +131,6 @@ function rhoColor(v: number, maxAbs: number): string {
   return `rgb(${Math.round(15 + t * 20)}, ${Math.round(40 + t * 180)}, ${Math.round(60 + t * 195)})`;
 }
 
-/** Dark → bright activation color */
 function activationColor(
   v: number,
   maxVal: number,
@@ -162,10 +147,6 @@ function activationColor(
       return `rgb(${Math.round(15 + t * 25)}, ${Math.round(30 + t * 190)}, ${Math.round(50 + t * 205)})`;
   }
 }
-
-// =============================================================================
-// MAIN COMPONENT
-// =============================================================================
 
 export function BDHArchitectureDiagram({
   frameData,
@@ -233,7 +214,7 @@ export function BDHArchitectureDiagram({
 
   return (
     <div className="flex gap-6">
-      {/* ===== LEFT SIDEBAR ===== */}
+      {/* LEFT SIDEBAR*/}
       <div className="w-48 flex-shrink-0">
         <div className="glass-card p-3 sticky top-4">
           <h3 className="text-sm font-semibold text-[#CBD5E0] mb-3">
@@ -286,7 +267,7 @@ export function BDHArchitectureDiagram({
         </div>
       </div>
 
-      {/* ===== SVG ARCHITECTURE DIAGRAM ===== */}
+      {/* SVG ARCHITECTURE DIAGRAM*/}
       <div className="flex-1 min-w-0">
         <svg
           viewBox={`0 0 ${W} 1650`}
@@ -362,7 +343,7 @@ export function BDHArchitectureDiagram({
 
           <rect width="100%" height="100%" fill={`url(#grid-${uniqueId})`} />
 
-          {/* ===== TITLE ===== */}
+          {/* TITLE*/}
           <text
             x={CX}
             y="28"
@@ -386,7 +367,7 @@ export function BDHArchitectureDiagram({
             </text>
           )}
 
-          {/* ===== EMBEDDING (y=65, h=115) ===== */}
+          {/* EMBEDDING (y=65, h=115)*/}
           <g transform={`translate(${CX - 225}, 65)`}>
             <ArchBox
               width={450}
@@ -470,7 +451,7 @@ export function BDHArchitectureDiagram({
 
           <FlowArrow x1={CX} y1={180} x2={CX} y2={212} active={isActive(1)} />
 
-          {/* ===== LAYERNORM (y=212, h=55) ===== */}
+          {/* LAYERNORM (y=212, h=55)*/}
           <g transform={`translate(${CX - 205}, 212)`}>
             <ArchBox
               width={410}
@@ -553,7 +534,7 @@ export function BDHArchitectureDiagram({
             </ArchBox>
           </g>
 
-          {/* ===== BRANCH ARROWS ===== */}
+          {/* BRANCH ARROWS*/}
           <FlowArrow x1={CX} y1={267} x2={CX} y2={280} active={isActive(2)} />
           {/* Left branch to x-path */}
           <path
@@ -627,11 +608,7 @@ export function BDHArchitectureDiagram({
             to attention (v*)
           </text>
 
-          {/* ================================================================ */}
-          {/* LEFT COLUMN: x-path                                              */}
-          {/* ================================================================ */}
-
-          {/* ===== LINEAR Dₓ (y=310, h=125) ===== */}
+          {/* LINEAR Dₓ (y=310, h=125)*/}
           <g transform={`translate(${LX}, 310)`}>
             <ArchBox
               width={LW}
@@ -715,7 +692,7 @@ export function BDHArchitectureDiagram({
             active={isActive(3)}
           />
 
-          {/* ===== RELU x (y=468, h=160) ===== */}
+          {/* RELU x (y=468, h=160)*/}
           <g transform={`translate(${LX}, 468)`}>
             <ArchBox
               width={LW}
@@ -924,11 +901,7 @@ export function BDHArchitectureDiagram({
             </path>
           )}
 
-          {/* ================================================================ */}
-          {/* RIGHT COLUMN: attention → y-path                                 */}
-          {/* ================================================================ */}
-
-          {/* ===== ρ MEMORY STATE (y=310, h=260) ===== */}
+          {/* ρ MEMORY STATE (y=310, h=260)*/}
           <g transform={`translate(${RX}, 310)`}>
             <ArchBox
               width={RW}
@@ -1022,7 +995,7 @@ export function BDHArchitectureDiagram({
             active={isActive(5)}
           />
 
-          {/* ===== a* READOUT (y=605, h=95) ===== */}
+          {/* a* READOUT (y=605, h=95) */}
           <g transform={`translate(${RX}, 605)`}>
             <ArchBox
               width={RW}
@@ -1101,7 +1074,7 @@ export function BDHArchitectureDiagram({
             active={isActive(6)}
           />
 
-          {/* ===== LINEAR Dᵧ (y=735, h=125) ===== */}
+          {/* LINEAR Dᵧ (y=735, h=125)*/}
           <g transform={`translate(${RX}, 735)`}>
             <ArchBox
               width={RW}
@@ -1185,7 +1158,7 @@ export function BDHArchitectureDiagram({
             active={isActive(7)}
           />
 
-          {/* ===== RELU y (y=895, h=160) ===== */}
+          {/* RELU y (y=895, h=160)*/}
           <g transform={`translate(${RX}, 895)`}>
             <ArchBox
               width={RW}
@@ -1352,11 +1325,7 @@ export function BDHArchitectureDiagram({
             </path>
           )}
 
-          {/* ================================================================ */}
-          {/* CENTER: merge, decode, output                                    */}
-          {/* ================================================================ */}
-
-          {/* ===== HADAMARD (y=1105) ===== */}
+          {/* HADAMARD (y=1105)*/}
           <g
             transform={`translate(${CX - 65}, 1105)`}
             onClick={(e) => {
@@ -1444,7 +1413,7 @@ export function BDHArchitectureDiagram({
 
           <FlowArrow x1={CX} y1={1230} x2={CX} y2={1265} active={isActive(9)} />
 
-          {/* ===== DECODER D (y=1265, h=180) ===== */}
+          {/* DECODER D (y=1265, h=180)*/}
           <g transform={`translate(${CX - 225}, 1265)`}>
             <ArchBox
               width={450}
@@ -1557,7 +1526,7 @@ export function BDHArchitectureDiagram({
             active={isActive(10)}
           />
 
-          {/* ===== RESIDUAL (y=1480) ===== */}
+          {/* RESIDUAL (y=1480)*/}
           <g
             transform={`translate(${CX - 28}, 1480)`}
             onClick={(e) => {
@@ -1637,7 +1606,7 @@ export function BDHArchitectureDiagram({
             </path>
           )}
 
-          {/* ===== OUTPUT PREDICTIONS ===== */}
+          {/* OUTPUT PREDICTIONS*/}
           {isActive(12) && predictions && (
             <g
               transform={`translate(${CX - 270}, 1570)`}
@@ -1730,11 +1699,6 @@ export function BDHArchitectureDiagram({
   );
 }
 
-// =============================================================================
-// VISUALIZATION SUB-COMPONENTS
-// =============================================================================
-
-/** Renders a small T×T heatmap of the ρ (attention score) matrix */
 function RhoMatrixViz({
   matrix,
   currentT,
@@ -1902,7 +1866,6 @@ function RhoMatrixViz({
   );
 }
 
-/** Renders a 1D heatmap strip — each cell colored by value (blue=neg, red=pos) */
 function HeatmapStrip({
   values,
   x,
@@ -1958,7 +1921,6 @@ function HeatmapStrip({
   );
 }
 
-/** Renders a histogram — negative bins in blue, positive in orange */
 function HistogramViz({
   bins,
   x,
@@ -2039,7 +2001,6 @@ function HistogramViz({
   );
 }
 
-/** Renders a neuron activation grid — rows=heads, cols=neuron bins */
 function NeuronGrid({
   grid,
   x,
@@ -2125,10 +2086,6 @@ function NeuronGrid({
     </g>
   );
 }
-
-// =============================================================================
-// STRUCTURAL COMPONENTS
-// =============================================================================
 
 interface ArchBoxProps {
   width: number;

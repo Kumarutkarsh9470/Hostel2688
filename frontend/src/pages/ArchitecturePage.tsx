@@ -13,17 +13,15 @@ import { BDHArchitectureDiagram } from "@/features/architecture/BDHArchitectureD
 import { MathDetailPanel } from "@/features/architecture/MathDetailPanel";
 import { usePlaybackStore } from "@/stores/playbackStore";
 
-// Must match STEPS in BDHArchitectureDiagram
-const NUM_ARCH_STEPS = 13; // 0..12
-const STEP_DURATION = 2000; // ms per architecture step
-const OUTPUT_DWELL = 500; // extra ms to hold on the final prediction step
+const NUM_ARCH_STEPS = 13;
+const STEP_DURATION = 2000;
+const OUTPUT_DWELL = 500;
 
 export function ArchitecturePage() {
   const [inputText, setInputText] = useState("The capital of France is Paris");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentLayer, setCurrentLayer] = useState(0);
 
-  // === Sequential animation state ===
   const [currentTokenIdx, setCurrentTokenIdx] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [, setStepProgress] = useState(0);
@@ -42,10 +40,8 @@ export function ArchitecturePage() {
     reset,
   } = usePlaybackStore();
 
-  // Total number of tokens
   const numTokens = playbackData?.input_chars?.length ?? 0;
 
-  // Find frame index for a specific token and layer
   const findFrameIndex = useCallback(
     (tokenIdx: number, layer: number): number => {
       if (!playbackData) return 0;
@@ -57,24 +53,20 @@ export function ArchitecturePage() {
     [playbackData],
   );
 
-  // Current frame data for display
   const currentFrameData = playbackData
     ? playbackData.frames[findFrameIndex(currentTokenIdx, currentLayer)]
     : undefined;
 
-  // Sync store frame when token/layer changes
   useEffect(() => {
     if (!playbackData) return;
     const idx = findFrameIndex(currentTokenIdx, currentLayer);
     setFrame(idx);
   }, [currentTokenIdx, currentLayer, playbackData, findFrameIndex, setFrame]);
 
-  // Load playback data on mount
   useEffect(() => {
     loadPlayback(inputText);
   }, []);
 
-  // === Master animation timer ===
   useEffect(() => {
     if (!isPlaying || !playbackData) {
       if (timerRef.current) {
@@ -661,7 +653,6 @@ function InsightCard({
   );
 }
 
-/** Shows elapsed time during loading */
 function LoadingTimer() {
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {

@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// In production VITE_API_URL points to the HF Space backend;
-// in dev it's empty so Vite's proxy handles /api → localhost:8000
+// In production VITE_API_URL points to HF Space; in dev Vite proxies /api
 const API_ORIGIN = import.meta.env.VITE_API_URL || "";
 const API_BASE = `${API_ORIGIN}/api`;
 
@@ -10,9 +9,6 @@ export const api = axios.create({
   timeout: 30000,
 });
 
-/* ------------------------------------------------------------------ */
-/*  Backend connection status (reactive)                               */
-/* ------------------------------------------------------------------ */
 type StatusListener = (connected: boolean) => void;
 const _listeners = new Set<StatusListener>();
 let _backendConnected = false;
@@ -32,7 +28,7 @@ function _setConnected(v: boolean) {
   }
 }
 
-// Health-check poller — runs every 5 s, marks backend up/down
+// Health-check poller (5s interval)
 let _polling = false;
 export function startHealthPoll() {
   if (_polling) return;
@@ -49,7 +45,6 @@ export function startHealthPoll() {
   setInterval(poll, 5000);
 }
 
-// Axios interceptor — update status on every response / error
 api.interceptors.response.use(
   (res) => {
     _setConnected(true);
@@ -64,7 +59,6 @@ api.interceptors.response.use(
   },
 );
 
-// Inference endpoints
 export const inference = {
   run: (text: string, modelName = "french") =>
     api.post("/inference/run", { text, model_name: modelName }),
@@ -80,7 +74,6 @@ export const inference = {
     api.post("/inference/extract-detailed", { text, model_name: modelName }),
 };
 
-// Analysis endpoints
 export const analysis = {
   sparsity: (texts: string[], modelName = "french") =>
     api.post("/analysis/sparsity", { texts, model_name: modelName }),
@@ -128,7 +121,6 @@ export const analysis = {
     }),
 };
 
-// Model endpoints
 export const models = {
   list: () => api.get("/models/list"),
 
@@ -146,7 +138,6 @@ export const models = {
     api.get(`/models/${modelName}/graph`, { params: { threshold } }),
 };
 
-// Visualization endpoints
 export const visualization = {
   playback: (text: string, modelName = "french", includeAttention = false) =>
     api.post("/visualization/playback", {
@@ -163,17 +154,14 @@ export const visualization = {
   getColorScheme: () => api.get("/visualization/color-scheme"),
 };
 
-// Utility function to load playback from static JSON
 export async function loadPlaybackJSON(filename: string) {
   const response = await fetch(`/playback/${filename}`);
   if (!response.ok) throw new Error(`Failed to load ${filename}`);
   return response.json();
 }
 
-// Health check (hits root /health, NOT /api/health)
 export const health = () => axios.get("/health", { timeout: 4000 });
 
-// Graph Brain endpoints
 export const graph = {
   getClusters: (modelName: string, head = 0, beta = 1.0, maxNodes = 400) =>
     api.get(`/graph/clusters/${modelName}`, {

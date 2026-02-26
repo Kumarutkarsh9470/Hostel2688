@@ -1,11 +1,4 @@
-"""
-Analysis API Routes
-
-Endpoints for interpretability analysis:
-- Sparsity measurement
-- Monosemanticity probing
-- Comparative analysis
-"""
+"""Analysis API routes."""
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Request
@@ -14,12 +7,6 @@ import torch
 import numpy as np
 
 router = APIRouter()
-
-
-# =============================================================================
-# REQUEST/RESPONSE MODELS
-# =============================================================================
-
 class SparsityRequest(BaseModel):
     """Request for sparsity analysis."""
     texts: List[str] = Field(..., description="Texts to analyze")
@@ -73,12 +60,6 @@ class CompareRequest(BaseModel):
     """Request for model comparison."""
     text: str
     model_names: List[str] = Field(..., description="Models to compare")
-
-
-# =============================================================================
-# ENDPOINTS
-# =============================================================================
-
 @router.post("/sparsity", response_model=SparsityResponse)
 def analyze_sparsity(request: SparsityRequest, req: Request):
     """
@@ -305,7 +286,6 @@ def neuron_fingerprint(request: ConceptProbeRequest, req: Request):
     n_heads = config.n_head
     n_neurons = config.n_neurons
 
-    # ── Collect per-word activations ──
     word_fingerprints = []
     # raw_x[layer][head] = list of (N,) arrays, one per word
     raw_x: Dict[int, Dict[int, list]] = {}
@@ -367,7 +347,6 @@ def neuron_fingerprint(request: ConceptProbeRequest, req: Request):
 
         word_fingerprints.append({"word": text, "layers": layers_data})
 
-    # ── Cosine similarity matrix (per layer, averaged across heads) ──
     n_words = len(request.examples)
     similarity_by_layer: Dict[int, list] = {}
 
@@ -385,7 +364,6 @@ def neuron_fingerprint(request: ConceptProbeRequest, req: Request):
             for i in range(n_words)
         ]
 
-    # ── Shared neurons: for each (layer, head), find neurons active in ALL words ──
     shared_neurons = []
     for layer_idx in sorted(raw_x.keys()):
         for h in range(n_heads):
@@ -520,12 +498,6 @@ async def get_concept_categories():
                 "languages": {"description": "Language names", "num_examples": 15},
             }
         }
-
-
-# =============================================================================
-# NEURON FINGERPRINT — returns FingerprintResult-shaped data for live probing
-# =============================================================================
-
 class NeuronFingerprintRequest(BaseModel):
     """Request for neuron fingerprinting."""
     concept_name: str = Field(..., description="Concept label")
@@ -569,7 +541,6 @@ def neuron_fingerprint(request: NeuronFingerprintRequest, req: Request):
     # raw_x[layer][head] = list of (N,) arrays, one per word
     raw_x: Dict[int, Dict[int, list]] = {}
 
-    # ── Pass 1: Collect raw activations for baseline ──
     all_activations: Dict[tuple, list] = {}
     for text in request.words:
         sentence = TEMPLATE.format(word=text)
@@ -597,7 +568,6 @@ def neuron_fingerprint(request: NeuronFingerprintRequest, req: Request):
     for key, vecs in all_activations.items():
         global_baseline[key] = np.mean(np.stack(vecs), axis=0)
 
-    # ── Pass 2: Extract with selectivity ──
     for text in request.words:
         sentence = TEMPLATE.format(word=text)
         tokens = torch.tensor(

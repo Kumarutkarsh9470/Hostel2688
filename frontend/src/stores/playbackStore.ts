@@ -1,6 +1,5 @@
 import { create } from "zustand";
 
-// Types for our data structures
 interface TimelinePoint {
   iteration: number;
   checkpoint: string;
@@ -51,7 +50,6 @@ interface PlaybackFrame {
   y_active: Array<{ indices: number[]; values: number[] }>;
   x_sparsity: number;
   y_sparsity: number;
-  // Extended interpretability fields
   x_active_count?: number;
   y_active_count?: number;
   x_top_neurons?: Array<{ head: number; neuron: number; value: number }>;
@@ -114,30 +112,24 @@ interface Manifest {
   has_full_checkpoints?: boolean;
 }
 
-// Store state
 interface EvolutionState {
-  // Data
   currentModel: "french" | "portuguese" | "merged";
   manifest: Manifest | null;
   timeline: EvolutionTimeline | null;
   keyframes: KeyframeData[];
   conceptEvolution: ConceptEvolution | null;
 
-  // Current selection
   currentIteration: number;
   currentKeyframeIndex: number;
   isPlaying: boolean;
-  playbackSpeed: number; // ms per frame
+  playbackSpeed: number;
 
-  // Loading state
   isLoading: boolean;
   loadingProgress: number;
   error: string | null;
 
-  // Cached full checkpoint data
   loadedCheckpoints: { [key: string]: any };
 
-  // Actions
   setModel: (model: "french" | "portuguese" | "merged") => Promise<void>;
   loadModelData: (model: string) => Promise<void>;
   setIteration: (iteration: number) => void;
@@ -150,14 +142,12 @@ interface EvolutionState {
   setPlaybackSpeed: (speed: number) => void;
   loadFullCheckpoint: (checkpoint: string) => Promise<any>;
 
-  // Computed
   getCurrentKeyframe: () => KeyframeData | null;
   getIterationData: (iteration: number) => TimelinePoint | null;
   getSparsityAtIteration: (iteration: number) => number;
   getClosestKeyframeIndex: (iteration: number) => number;
 }
 
-// Helper to fetch JSON
 async function fetchJSON<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -341,10 +331,6 @@ export const useEvolutionStore = create<EvolutionState>((set, get) => ({
   },
 }));
 
-// ============================================================================
-// ORIGINAL PLAYBACK STORE (for single checkpoint playback)
-// ============================================================================
-
 interface PlaybackData {
   input_text: string;
   input_tokens: number[];
@@ -355,7 +341,6 @@ interface PlaybackData {
   frames: PlaybackFrame[];
   overall_sparsity?: number;
   sparsity_by_layer?: number[];
-  // Extended fields for interpretability
   embedding_dim?: number;
   total_neurons?: number;
   predictions?: Array<Array<{ byte: number; char: string; prob: number }>>;

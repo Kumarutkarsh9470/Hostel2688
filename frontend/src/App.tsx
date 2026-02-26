@@ -10,7 +10,6 @@ import { MergePage } from "./pages/MergePage";
 import { FindingsPage } from "./pages/FindingsPage";
 import { LearnBDHPage } from "./pages/LearnBDHPage";
 
-// Lazy-load 3D-heavy pages to isolate Three.js and prevent app-wide crashes
 const GraphPage = lazy(() =>
   import("./pages/GraphPage").then((m) => ({ default: m.GraphPage })),
 );
@@ -26,7 +25,6 @@ function Loading() {
   );
 }
 
-// Route-level ErrorBoundary — catches crashes from lazy-loaded 3D pages
 class RouteErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: string }
@@ -95,7 +93,14 @@ function App() {
           <Route path="monosemanticity" element={<MonosemanticityPage />} />
           <Route path="hebbian" element={<HebbianPage />} />
           <Route path="merge" element={<MergePage />} />
-          <Route path="findings" element={<RouteErrorBoundary><FindingsPage /></RouteErrorBoundary>} />
+          <Route
+            path="findings"
+            element={
+              <RouteErrorBoundary>
+                <FindingsPage />
+              </RouteErrorBoundary>
+            }
+          />
           <Route path="learn" element={<LearnBDHPage />} />
         </Route>
       </Routes>

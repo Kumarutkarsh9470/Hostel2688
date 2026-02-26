@@ -10,10 +10,6 @@ import * as d3 from "d3";
 import { Play, Pause, RotateCcw, ChevronDown } from "lucide-react";
 import { adaptMonoData, adaptMergeData } from "../utils/dataAdapters";
 
-/* ================================================================ */
-/*  Types                                                            */
-/* ================================================================ */
-
 interface HistogramBin {
   bin_start: number;
   bin_end: number;
@@ -126,10 +122,6 @@ interface MergeData {
   };
 }
 
-/* ================================================================ */
-/*  Constants & Helpers                                               */
-/* ================================================================ */
-
 const C = {
   french: "#3b82f6",
   portuguese: "#10b981",
@@ -140,10 +132,6 @@ const C = {
 };
 
 const CARD = "rounded-xl p-6" + " " + "card-interactive";
-
-/* ================================================================ */
-/*  Animated Counter                                                  */
-/* ================================================================ */
 
 function AnimatedNumber({
   target,
@@ -183,10 +171,6 @@ function AnimatedNumber({
   );
 }
 
-/* ================================================================ */
-/*  Hero Stat Card                                                    */
-/* ================================================================ */
-
 function HeroCard({
   label,
   value,
@@ -216,10 +200,6 @@ function HeroCard({
     </div>
   );
 }
-
-/* ================================================================ */
-/*  Loss Comparison Grouped Bar Chart                                 */
-/* ================================================================ */
 
 function LossChart({ evaluation }: { evaluation: Record<string, EvalResult> }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -366,10 +346,6 @@ function LossChart({ evaluation }: { evaluation: Record<string, EvalResult> }) {
   );
 }
 
-/* ================================================================ */
-/*  Fine-tune Before/After                                            */
-/* ================================================================ */
-
 function FinetuneMeter({
   preLoss,
   postLoss,
@@ -417,10 +393,6 @@ function FinetuneMeter({
     </div>
   );
 }
-
-/* ================================================================ */
-/*  Selectivity Histogram                                             */
-/* ================================================================ */
 
 function SelectivityHistogram({ histogram }: { histogram: HistogramBin[] }) {
   const W = 480,
@@ -506,10 +478,6 @@ function SelectivityHistogram({ histogram }: { histogram: HistogramBin[] }) {
   );
 }
 
-/* ================================================================ */
-/*  Radial Gauge                                                      */
-/* ================================================================ */
-
 function RadialGauge({
   value,
   max,
@@ -577,10 +545,6 @@ function RadialGauge({
     </div>
   );
 }
-
-/* ================================================================ */
-/*  Heritage Routing Donut                                            */
-/* ================================================================ */
 
 function RoutingDonut({
   frPct,
@@ -668,10 +632,6 @@ function RoutingDonut({
     </div>
   );
 }
-
-/* ================================================================ */
-/*  Sigma Curve Mini-Replay                                           */
-/* ================================================================ */
 
 function SigmaReplay({
   tracking,
@@ -857,10 +817,6 @@ function SigmaReplay({
   );
 }
 
-/* ================================================================ */
-/*  Cross-Concept Distinctness                                        */
-/* ================================================================ */
-
 function DistinctnessChart({
   crossConcept,
   nLayers,
@@ -986,10 +942,6 @@ function DistinctnessChart({
   );
 }
 
-/* ================================================================ */
-/*  Neuron Heatmap                                                    */
-/* ================================================================ */
-
 function NeuronHeatmap({
   concepts,
 }: {
@@ -1041,10 +993,6 @@ function NeuronHeatmap({
   );
 }
 
-/* ================================================================ */
-/*  Section Header                                                    */
-/* ================================================================ */
-
 function SectionHead({
   title,
   sub,
@@ -1060,10 +1008,6 @@ function SectionHead({
     </div>
   );
 }
-
-/* ================================================================ */
-/*  Main Page                                                         */
-/* ================================================================ */
 
 export function FindingsPage() {
   const [monoData, setMonoData] = useState<PrecomputedData | null>(null);
@@ -1135,7 +1079,7 @@ export function FindingsPage() {
       className="max-w-6xl mx-auto space-y-16 pb-20"
       style={{ background: "#070D12", minHeight: "100vh" }}
     >
-      {/* ── Title ── */}
+      {/* Title */}
       <div className="pt-4">
         <h1 className="text-2xl font-bold text-[#E2E8F0] mb-1">Findings</h1>
         <p className="text-[#4A5568] text-sm">
@@ -1144,7 +1088,7 @@ export function FindingsPage() {
         </p>
       </div>
 
-      {/* ── Hero Stats ── */}
+      {/* Hero Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <HeroCard label="Neurons Analyzed" value={sel.total_neurons} />
         <HeroCard label="Selective Neurons" value={sel.total_selective} />
@@ -1156,7 +1100,7 @@ export function FindingsPage() {
         <HeroCard label="Concept Categories" value={nCats} />
       </div>
 
-      {/* ── Loss Landscape ── */}
+      {/* Loss Landscape */}
       <section>
         <SectionHead
           title="Loss Landscape"
@@ -1180,7 +1124,7 @@ export function FindingsPage() {
         </div>
       </section>
 
-      {/* ── Selectivity ── */}
+      {/* Selectivity */}
       <section>
         <SectionHead
           title="Neuron Selectivity"
@@ -1203,7 +1147,7 @@ export function FindingsPage() {
         </div>
       </section>
 
-      {/* ── Heritage Routing ── */}
+      {/* Heritage Routing */}
       {probe && (
         <section>
           <SectionHead
@@ -1272,7 +1216,7 @@ export function FindingsPage() {
         </section>
       )}
 
-      {/* ── Sigma Replay ── */}
+      {/* Sigma Replay */}
       {trackingCats.length > 0 && (
         <section>
           <SectionHead
@@ -1305,7 +1249,7 @@ export function FindingsPage() {
         </section>
       )}
 
-      {/* ── Cross-Concept Distinctness ── */}
+      {/* Cross-Concept Distinctness */}
       <section>
         <SectionHead
           title="Cross-Concept Distinctness"
@@ -1319,7 +1263,7 @@ export function FindingsPage() {
         </div>
       </section>
 
-      {/* ── Neuron Heatmap ── */}
+      {/* Neuron Heatmap */}
       <section>
         <SectionHead
           title="Monosemantic Neuron Map"

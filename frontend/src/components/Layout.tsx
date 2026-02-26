@@ -19,7 +19,6 @@ import {
 import { onBackendStatus, startHealthPoll } from "../utils/api";
 import { spring } from "../utils/motion";
 
-/* ─── Nav items — "different lenses on the same brain" ─── */
 const navItems = [
   { path: "/", icon: Home, label: "Observatory", sub: "Home" },
   {
@@ -69,7 +68,7 @@ export function Layout() {
       className="min-h-screen flex noise-overlay vignette"
       style={{ background: "#070D12" }}
     >
-      {/* ─── Sidebar ─── */}
+      {/* Sidebar */}
       <aside
         className="w-60 flex flex-col shrink-0 border-r"
         style={{ background: "#0B1216", borderColor: "rgba(255,255,255,0.06)" }}
@@ -163,7 +162,7 @@ export function Layout() {
         </div>
       </aside>
 
-      {/* ─── Main Content ─── */}
+      {/* Main Content */}
       <main className="flex-1 overflow-auto flex flex-col">
         {/* Backend banner */}
         <AnimatePresence>

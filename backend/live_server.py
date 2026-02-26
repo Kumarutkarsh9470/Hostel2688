@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
-"""
-BDH Live Inference Server
-
-This is a simplified, single-file backend that:
-1. Loads your trained .pt model
-2. Accepts any text input via API
-3. Returns real-time activation data for visualization
-
-Run:
-    python live_server.py --model checkpoints/french/french_best.pt
-
-Then your frontend can POST to http://localhost:8000/api/inference
-"""
+"""Standalone BDH inference server. Usage: python live_server.py --model checkpoints/french/french_best.pt"""
 
 import argparse
 import math
@@ -29,12 +17,6 @@ import uvicorn
 # PyTorch
 import torch
 import torch.nn.functional as F
-
-
-# ============================================================================
-# BDH MODEL (Minimal version for inference)
-# ============================================================================
-
 @dataclass
 class BDHConfig:
     n_layer: int = 6
@@ -89,7 +71,6 @@ class BDH(torch.nn.Module):
         # RoPE frequencies
         self.register_buffer("rope_freqs", get_freqs(N).view(1, 1, 1, N))
 
-    # ── helpers ──────────────────────────────────────────────────
     def _rope(self, x: torch.Tensor) -> torch.Tensor:
         """Apply Rotary Position Embedding."""
         _, _, T, _ = x.size()
@@ -103,7 +84,6 @@ class BDH(torch.nn.Module):
                             dim=-1).view(*x.size())
         return (x * torch.cos(phases)).to(x.dtype) + (v_rot * torch.sin(phases)).to(x.dtype)
 
-    # ── forward ──────────────────────────────────────────────────
     def forward_with_extraction(self, idx: torch.Tensor) -> tuple:
         """Forward pass that captures all activations for visualization."""
         C = self.config
@@ -149,7 +129,6 @@ class BDH(torch.nn.Module):
         logits = x.view(B, T, D) @ self.lm_head
         return logits, extractions
 
-    # ── generation ───────────────────────────────────────────────
     @torch.no_grad()
     def generate(self, idx: torch.Tensor, max_new_tokens: int,
                  temperature: float = 1.0, top_k: int = 5):
@@ -167,7 +146,6 @@ class BDH(torch.nn.Module):
         return idx
 
 
-# ── key remapping for legacy checkpoints ─────────────────────────
 _LEGACY_KEY_MAP = {
     "encoder":   "decoder_x",     # V1 encoder (nh, D, N) → new decoder_x
     "encoder_v": "decoder_y",     # V1 encoder_v           → new decoder_y
@@ -241,12 +219,6 @@ def load_model(checkpoint_path: str, device: str = "cpu") -> tuple:
     print(
         f"Loaded: {config.n_layer}L, {config.n_embd}D, {config.n_head}H, N={config.n_neurons}")
     return model, config
-
-
-# ============================================================================
-# FASTAPI SERVER
-# ============================================================================
-
 app = FastAPI(
     title="BDH Live Inference",
     description="Real-time inference and visualization for BDH models"
@@ -278,12 +250,6 @@ class GenerateRequest(BaseModel):
     prompt: str
     max_tokens: int = 50
     temperature: float = 1.0
-
-
-# ============================================================================
-# API ENDPOINTS
-# ============================================================================
-
 @app.get("/")
 def root():
     return {
@@ -453,12 +419,6 @@ def model_info():
         "total_neurons": CONFIG.total_neurons,
         "device": DEVICE,
     }
-
-
-# ============================================================================
-# MAIN
-# ============================================================================
-
 def main():
     global MODEL, CONFIG, DEVICE
 

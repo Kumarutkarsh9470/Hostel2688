@@ -1,8 +1,4 @@
-"""
-Model Service
-
-Handles loading, caching, and managing BDH model checkpoints.
-"""
+"""Model loading, caching, and checkpoint management."""
 
 import torch
 import threading
@@ -14,15 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "training"))
 
 
 class ModelService:
-    """
-    Service for managing BDH model instances.
-
-    Features:
-    - Load/unload model checkpoints
-    - Cache loaded models in memory
-    - Thread-safe model access
-    - Support for multiple models (French, Portuguese, Merged)
-    """
+    """Manages BDH model instances with LRU caching and thread-safe access."""
 
     def __init__(
         self,

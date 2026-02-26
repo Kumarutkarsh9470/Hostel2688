@@ -1,12 +1,4 @@
-"""
-Visualization API Routes
-
-Endpoints for visualization data:
-- Playback data for frontend
-- Graph layout computation
-- Hebbian state tracking
-- Architecture specification
-"""
+"""Visualization API routes."""
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Request
@@ -16,12 +8,6 @@ import torch
 import numpy as np
 
 router = APIRouter()
-
-
-# =============================================================================
-# REQUEST/RESPONSE MODELS
-# =============================================================================
-
 class PlaybackRequest(BaseModel):
     """Request for playback data generation."""
     text: str
@@ -35,12 +21,6 @@ class HebbianTrackRequest(BaseModel):
     model_name: str = Field(default="french")
     layer: Optional[int] = Field(default=None, description="Specific layer to track, None=all")
     top_k_synapses: int = Field(default=5, description="Number of top synapses to track")
-
-
-# =============================================================================
-# ENDPOINTS
-# =============================================================================
-
 @router.post("/playback")
 def generate_playback(request: PlaybackRequest, req: Request):
     """
@@ -468,7 +448,6 @@ def track_hebbian(request: HebbianTrackRequest, req: Request):
     N = config.n_neurons
     n_layers = config.n_layer
     
-    # ── Helper: split text into words with byte boundaries ──
     def split_words(text: str):
         words = []
         encoded = text.encode("utf-8")
@@ -493,7 +472,6 @@ def track_hebbian(request: HebbianTrackRequest, req: Request):
     
     word_boundaries = split_words(text)
     
-    # ── Phase 1: Full forward pass with extraction ──
     extraction_config = ExtractionConfig(
         capture_sparse_activations=True,
         capture_attention_patterns=False,
@@ -595,7 +573,6 @@ def track_hebbian(request: HebbianTrackRequest, req: Request):
                 
                 layer_word_data[layer_idx] = head_data
     
-    # ── Phase 2: Before-context predictions ──
     # Feed just the first few bytes (before the main content)
     # to show what the model predicts without context
     prefix_len = min(3, T)  # first 3 bytes as minimal context
@@ -616,7 +593,6 @@ def track_hebbian(request: HebbianTrackRequest, req: Request):
     else:
         before_predictions = []
     
-    # ── Phase 3: Layer-by-layer σ summary ──
     layer_summary = []
     for layer_idx in sorted(layer_word_data.keys()):
         head_summaries = []
@@ -636,7 +612,6 @@ def track_hebbian(request: HebbianTrackRequest, req: Request):
             "heads": head_summaries,
         })
     
-    # ── Phase 4: Sparsity stats ──
     with torch.no_grad():
         with model.extraction_mode(extraction_config) as buffer:
             model(tokens_tensor)

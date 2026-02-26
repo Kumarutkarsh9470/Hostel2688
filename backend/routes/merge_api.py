@@ -1,10 +1,4 @@
-"""
-Merge API Routes
-
-Endpoints for merge-related live features:
-- Heritage probe (neuron activation analysis by language)
-- Side-by-side generation comparison
-"""
+"""Merge API routes (heritage probe, side-by-side generation)."""
 
 import torch
 from pydantic import BaseModel, Field
@@ -17,12 +11,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "training"))
 
 
 router = APIRouter()
-
-
-# =============================================================================
-# REQUEST/RESPONSE MODELS
-# =============================================================================
-
 class HeritageProbeRequest(BaseModel):
     text: str = Field(..., description="Text to probe")
     model_name: str = Field(
@@ -32,12 +20,6 @@ class HeritageProbeRequest(BaseModel):
 class SideBySideRequest(BaseModel):
     prompt: str = Field(..., description="Prompt text")
     max_tokens: int = Field(default=60, ge=1, le=300)
-
-
-# =============================================================================
-# HERITAGE PROBE
-# =============================================================================
-
 @router.post("/heritage-probe")
 def heritage_probe(request: HeritageProbeRequest, req: Request):
     """
@@ -140,12 +122,6 @@ def heritage_probe(request: HeritageProbeRequest, req: Request):
             "dominant_heritage": heritage["model1_name"] if fr_pct > pt_pct else heritage["model2_name"],
         },
     }
-
-
-# =============================================================================
-# SIDE-BY-SIDE GENERATION
-# =============================================================================
-
 @router.post("/side-by-side")
 def side_by_side(request: SideBySideRequest, req: Request):
     """

@@ -1,17 +1,4 @@
-"""
-BDH Interpretability Suite - FastAPI Backend
-
-Provides REST API for:
-- Model inference with activation extraction
-- Sparsity analysis
-- Monosemanticity probing
-- Graph topology queries
-- Real-time Hebbian tracking
-
-The frontend can work in two modes:
-1. Live mode: Calls these APIs for real-time analysis
-2. Playback mode: Uses pre-computed JSON (no backend needed)
-"""
+"""BDH Interpretability Suite - FastAPI Backend"""
 
 import torch
 from pydantic import BaseModel, Field
@@ -43,10 +30,6 @@ try:
     from backend.routes import merge_api as merge_routes
 except ImportError:
     merge_routes = None
-# =============================================================================
-# CONFIGURATION
-# =============================================================================
-
 # Get the project root directory (parent of backend/)
 _PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -81,12 +64,6 @@ class Settings:
 
 
 settings = Settings()
-
-
-# =============================================================================
-# APPLICATION LIFECYCLE
-# =============================================================================
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup and shutdown."""
@@ -120,31 +97,10 @@ async def lifespan(app: FastAPI):
     # Shutdown
     print("\n[SHUTDOWN] Shutting down...")
     app.state.model_service.unload_all()
-
-
-# =============================================================================
-# APPLICATION
-# =============================================================================
-
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="""
-    Backend API for the BDH Interpretability Suite.
-    
-    ## Features
-    
-    - **Inference**: Run text through BDH model with activation extraction
-    - **Analysis**: Sparsity measurement, monosemanticity probing
-    - **Visualization**: Graph topology, attention patterns
-    - **Models**: Load/unload model checkpoints
-    
-    ## Modes
-    
-    The frontend can work in two modes:
-    1. **Live mode**: Calls these APIs for real-time analysis
-    2. **Playback mode**: Uses pre-computed JSON (backend optional)
-    """,
+    description="Backend API for the BDH Interpretability Suite.",
     lifespan=lifespan,
 )
 
@@ -156,12 +112,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# =============================================================================
-# ROUTES
-# =============================================================================
-
 app.include_router(
     inference.router,
     prefix=f"{settings.API_PREFIX}/inference",
@@ -201,12 +151,6 @@ if merge_routes:
         prefix=f"{settings.API_PREFIX}/merge",
         tags=["merge"]
     )
-
-
-# =============================================================================
-# ROOT ENDPOINTS
-# =============================================================================
-
 @app.get("/")
 async def root():
     """Root endpoint with API info."""
@@ -240,12 +184,6 @@ async def api_status():
         "available_models": model_service.list_available_models(),
         "device": settings.DEVICE,
     }
-
-
-# =============================================================================
-# ERROR HANDLERS
-# =============================================================================
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler."""

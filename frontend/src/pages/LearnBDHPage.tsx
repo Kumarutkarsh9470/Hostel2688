@@ -2,9 +2,6 @@ import React, { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-/* ═══════════════════════════════════════════════════════════════
-   DETERMINISTIC PSEUDO-RANDOM  (stable across renders)
-   ═══════════════════════════════════════════════════════════════ */
 function seededRandom(seed: number) {
   let s = seed;
   return () => {
@@ -13,9 +10,6 @@ function seededRandom(seed: number) {
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   STEP DATA — BDH Architecture Building Blocks
-   ═══════════════════════════════════════════════════════════════ */
 interface StepData {
   id: number;
   title: string;
@@ -360,9 +354,6 @@ const DIFF_COLORS: Record<
   },
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   VISUALIZATIONS — One per architecture step
-   ═══════════════════════════════════════════════════════════════ */
 
 /* ---------- 1. Byte Embedding -------------------------------- */
 const ByteEmbeddingViz: React.FC = () => {
@@ -1091,9 +1082,6 @@ const FullLayerViz: React.FC = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   STEP VISUALIZATION ROUTER
-   ═══════════════════════════════════════════════════════════════ */
 const vizComponents: Record<number, React.FC> = {
   1: ByteEmbeddingViz,
   2: SparseEncodingViz,
@@ -1110,9 +1098,6 @@ const StepVisualization: React.FC<{ stepId: number }> = ({ stepId }) => {
   return Viz ? <Viz /> : null;
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   MAIN COMPONENT
-   ═══════════════════════════════════════════════════════════════ */
 export function LearnBDHPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [activeTab, setActiveTab] = useState<"description" | "theory">(
@@ -1138,7 +1123,7 @@ export function LearnBDHPage() {
 
   return (
     <div className="flex h-full min-h-0" style={{ background: "#070D12" }}>
-      {/* ── Sidebar ── */}
+      {/* Sidebar */}
       <aside className="w-72 shrink-0 border-r border-white/[0.06] bg-[#0B1216] flex flex-col">
         <div className="px-6 pt-6 pb-4">
           <h2 className="text-sm font-semibold text-[#E2E8F0] tracking-tight">
@@ -1185,7 +1170,7 @@ export function LearnBDHPage() {
         </nav>
       </aside>
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <main className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">
           <motion.div
@@ -1196,7 +1181,7 @@ export function LearnBDHPage() {
             transition={{ duration: 0.2 }}
             className="max-w-4xl mx-auto px-8 py-8"
           >
-            {/* ── Header ── */}
+            {/* Header */}
             <div className="flex items-center gap-3 mb-1">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#00C896]/10 text-[#00C896] border border-[#00C896]/20">
                 {String(step.id).padStart(2, "0")}/
@@ -1213,7 +1198,7 @@ export function LearnBDHPage() {
             </div>
             <p className="text-sm text-[#4A5568] mb-6">{step.subtitle}</p>
 
-            {/* ── Tabs ── */}
+            {/* Tabs */}
             <div className="flex gap-1 mb-6 border-b border-white/[0.06] pb-px">
               {(["description", "theory"] as const).map((tab) => (
                 <button
@@ -1230,7 +1215,7 @@ export function LearnBDHPage() {
               ))}
             </div>
 
-            {/* ── Tab content ── */}
+            {/* Tab content */}
             {activeTab === "description" ? (
               <div>
                 {/* Visualization card */}
@@ -1293,7 +1278,7 @@ export function LearnBDHPage() {
               </div>
             )}
 
-            {/* ── Navigation ── */}
+            {/* Navigation */}
             <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/[0.06]/60">
               <button
                 onClick={goPrev}

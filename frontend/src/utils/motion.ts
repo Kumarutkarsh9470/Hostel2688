@@ -1,39 +1,25 @@
-/**
- * BDH Neural Observatory — Motion System
- *
- * Principle: Motion = meaning. Every transition carries semantic weight.
- * Physics-based springs with biological feel.
- */
 import type { Transition, Variants } from "framer-motion";
 
-/* ═══════════════════════════════════════════════════════════════
-   SPRING CONFIGS — physics-based, never tween
-   ═══════════════════════════════════════════════════════════════ */
 export const spring = {
-  /** Default — biologically-weighted, "neuron firing" feel */
   default: {
     type: "spring",
     stiffness: 120,
     damping: 18,
     mass: 0.9,
   } as Transition,
-  /** Snappy — quick micro-interactions */
   snappy: {
     type: "spring",
     stiffness: 300,
     damping: 24,
     mass: 0.6,
   } as Transition,
-  /** Slow — page-level, dramatic reveals */
   slow: { type: "spring", stiffness: 60, damping: 20, mass: 1.2 } as Transition,
-  /** Bouncy — playful, for CTAs and pills */
   bouncy: {
     type: "spring",
     stiffness: 200,
     damping: 12,
     mass: 0.8,
   } as Transition,
-  /** Gentle — inspector panels, slide-ins */
   gentle: {
     type: "spring",
     stiffness: 80,
@@ -42,30 +28,16 @@ export const spring = {
   } as Transition,
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   CARD INTERACTION RULES
-   Tier 1: Surface (static info)
-   Tier 2: Interactive (hoverable, tappable)
-   Tier 3: Focus / Inspector (pinned, strong glow)
-   ═══════════════════════════════════════════════════════════════ */
-
-/** Tier 2 card hover/tap — use on interactive cards */
 export const cardInteraction = {
   whileHover: { y: -6, transition: spring.snappy },
   whileTap: { scale: 0.98, transition: spring.snappy },
 };
 
-/** Tier 3 focus card — inspector / detail panel */
 export const focusCardInteraction = {
   whileHover: { y: -3, transition: spring.snappy },
   whileTap: { scale: 0.99, transition: spring.snappy },
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   ANIMATION VARIANTS — Liquid reveal system
-   ═══════════════════════════════════════════════════════════════ */
-
-/** Fade up with spring — standard reveal */
 export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 32 },
   visible: (i: number = 0) => ({
@@ -78,7 +50,6 @@ export const fadeUp: Variants = {
   }),
 };
 
-/** Fade in from left — sidebar items */
 export const fadeLeft: Variants = {
   hidden: { opacity: 0, x: -24 },
   visible: (i: number = 0) => ({
@@ -88,7 +59,6 @@ export const fadeLeft: Variants = {
   }),
 };
 
-/** Scale up — cards, modals */
 export const scaleUp: Variants = {
   hidden: { opacity: 0, scale: 0.92 },
   visible: (i: number = 0) => ({
@@ -98,7 +68,6 @@ export const scaleUp: Variants = {
   }),
 };
 
-/** Stagger container */
 export const stagger: Variants = {
   hidden: {},
   visible: {
@@ -106,7 +75,6 @@ export const stagger: Variants = {
   },
 };
 
-/** Page transition — used in AnimatePresence around Outlet */
 export const pageTransition: Variants = {
   initial: { opacity: 0, y: 16 },
   animate: {
@@ -121,9 +89,6 @@ export const pageTransition: Variants = {
   },
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   THEME COLORS — Neural Observatory palette
-   ═══════════════════════════════════════════════════════════════ */
 export const theme = {
   bg: "#070D12",
   surface: "#0B1216",
@@ -141,18 +106,11 @@ export const theme = {
   border: "rgba(255,255,255,0.06)",
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   CSS CLASS HELPERS (Tailwind-compatible inline strings)
-   ═══════════════════════════════════════════════════════════════ */
-
-/** Tier 1 surface card */
 export const surfaceCard =
   "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl backdrop-blur-sm";
 
-/** Tier 2 interactive card */
 export const interactiveCard =
   "bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl backdrop-blur-sm transition-all duration-300 hover:border-[rgba(0,200,150,0.2)] hover:bg-[rgba(255,255,255,0.04)] hover:shadow-[0_0_30px_rgba(0,200,150,0.06)]";
 
-/** Tier 3 focus card */
 export const focusCard =
   "bg-[rgba(255,255,255,0.03)] border border-[rgba(0,200,150,0.15)] rounded-xl backdrop-blur-md shadow-[0_0_40px_rgba(0,200,150,0.08)]";

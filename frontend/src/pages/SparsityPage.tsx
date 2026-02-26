@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Zap, RefreshCw, AlertCircle } from "lucide-react";
 import { api } from "../utils/api";
 
-/* ── Types ──────────────────────────────────────────────────────────── */
 
 interface TokenSparsity {
   token_idx: number;
@@ -41,7 +40,6 @@ interface SparsityData {
   transformer_reference: TransformerRef;
 }
 
-/* ── Fallback data (from precomputed global_stats.json) ─────────────── */
 
 const FALLBACK: SparsityData = (() => {
   const rng = (s: number) => {
@@ -82,7 +80,6 @@ const FALLBACK: SparsityData = (() => {
   };
 })();
 
-/* ── Component ──────────────────────────────────────────────────────── */
 
 const DEFAULT_TEXTS: Record<string, string> = {
   french: "Le Parlement européen a adopté la résolution.",
@@ -250,7 +247,7 @@ export function SparsityPage() {
         )}
       </div>
 
-      {/* ── Side-by-side comparison ─────────────────────────────────── */}
+      {/* Side-by-side comparison */}
       <div className="grid md:grid-cols-5 gap-6 mb-6">
         {/* BDH card — primary measurement */}
         <div className="card-interactive p-6 md:col-span-3">
@@ -474,7 +471,7 @@ export function SparsityPage() {
         </div>
       </div>
 
-      {/* ── Per-Layer Breakdown ──────────────────────────────────────── */}
+      {/* Per-Layer Breakdown */}
       {d && d.per_layer.length > 0 && (
         <div className="card-interactive p-6 mb-6">
           <h3 className="text-sm font-semibold text-[#E2E8F0] mb-4">
@@ -546,7 +543,7 @@ export function SparsityPage() {
         </div>
       )}
 
-      {/* ── Per-Token Timeline ──────────────────────────────────────── */}
+      {/* Per-Token Timeline */}
       {d && d.per_token.length > 0 && (
         <div className="card-interactive p-6 mb-6">
           <h3 className="text-sm font-semibold text-[#E2E8F0] mb-1">
@@ -670,7 +667,7 @@ export function SparsityPage() {
         </div>
       )}
 
-      {/* ── Insight ─────────────────────────────────────────────────── */}
+      {/* Insight */}
       <div className="card-interactive p-6">
         <h3 className="text-sm font-semibold mb-3 text-[#E2E8F0]">
           Key Insight

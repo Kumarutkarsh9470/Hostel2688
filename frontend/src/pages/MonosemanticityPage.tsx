@@ -27,9 +27,6 @@ import * as d3 from "d3";
 import { analysis } from "../utils/api";
 import { adaptMonoData } from "../utils/dataAdapters";
 
-/* ================================================================== */
-/*  Type definitions                                                    */
-/* ================================================================== */
 interface TopNeuron {
   idx: number;
   val: number;
@@ -126,9 +123,6 @@ interface PrecomputedData {
   synapse_tracking?: Record<string, ConceptTracking>;
 }
 
-/* ================================================================== */
-/*  Constants — presets, colors, etc.                                   */
-/* ================================================================== */
 const PRESETS = [
   { id: "currency", name: "Currency", icon: "\u{1F4B0}", color: "#34d399" },
   { id: "country", name: "Country", icon: "\u{1F30D}", color: "#60a5fa" },
@@ -172,9 +166,6 @@ function presetOf(id: string) {
   return PRESETS.find((p) => p.id === id);
 }
 
-/* ================================================================== */
-/*  Color helpers                                                       */
-/* ================================================================== */
 function simColor(t: number): string {
   if (t < 0.3) return `rgba(59,130,246,${(0.15 + t * 0.5).toFixed(2)})`;
   if (t < 0.6) return `rgba(16,185,129,${(0.2 + (t - 0.3) * 1.5).toFixed(2)})`;
@@ -202,9 +193,6 @@ function sciColor(t: number): string {
   return `rgba(${Math.round(110 + u * 145)}, ${Math.round(220 + u * 35)}, ${Math.round(70 + u * 30)}, ${(0.9 + u * 0.1).toFixed(2)})`;
 }
 
-/* ================================================================== */
-/*  View tabs                                                          */
-/* ================================================================== */
 type ViewTab =
   | "similarity"
   | "crossConcept"
@@ -263,9 +251,6 @@ const VIEW_TABS: {
   },
 ];
 
-/* ================================================================== */
-/*  LAYER SELECTOR                                                      */
-/* ================================================================== */
 function LayerSelector({
   nLayers,
   selected,
@@ -310,9 +295,6 @@ function LayerSelector({
   );
 }
 
-/* ================================================================== */
-/*  NEURON STRIP — renders actual neuron positions                     */
-/* ================================================================== */
 function NeuronStrip({
   neurons,
   label,
@@ -438,9 +420,6 @@ function NeuronStrip({
   );
 }
 
-/* ================================================================== */
-/*  Helper: extract concept signature neurons                          */
-/* ================================================================== */
 function extractConceptSignature(
   result: FingerprintResult,
   layer: number,
@@ -475,9 +454,6 @@ function extractConceptSignature(
     .sort((a, b) => b.count - a.count || b.totalVal - a.totalVal);
 }
 
-/* ================================================================== */
-/*  1. SIMILARITY VIEW                                                 */
-/* ================================================================== */
 function SimilarityView({
   concepts,
   activeConcept,
@@ -670,9 +646,6 @@ function SimilarityView({
   );
 }
 
-/* ================================================================== */
-/*  2. CROSS-CONCEPT VIEW                                              */
-/* ================================================================== */
 function CrossConceptView({
   crossPairs,
   concepts,
@@ -995,9 +968,6 @@ function CrossConceptView({
   );
 }
 
-/* ================================================================== */
-/*  3. SYNAPSE TRACKING VIEW (NEW)                                     */
-/* ================================================================== */
 function SynapseTrackingView({
   tracking,
   activeConcept,
@@ -1489,9 +1459,6 @@ function SynapseTrackingView({
   );
 }
 
-/* ================================================================== */
-/*  4. SELECTIVITY VIEW (NEW)                                          */
-/* ================================================================== */
 function SelectivityView({
   selectivity,
   concepts,
@@ -1690,9 +1657,6 @@ function SelectivityView({
   );
 }
 
-/* ================================================================== */
-/*  5. INTERSECTION VIEW                                               */
-/* ================================================================== */
 function IntersectionView({
   result,
   selectedLayer,
@@ -1863,9 +1827,6 @@ function IntersectionView({
   );
 }
 
-/* ================================================================== */
-/*  6. NEURON GRAPH VIEW                                               */
-/* ================================================================== */
 interface GraphNode {
   id: string;
   label: string;
@@ -2406,9 +2367,6 @@ function NeuronGraphView({
   );
 }
 
-/* ================================================================== */
-/*  MONOSEMANTIC NEURON TABLE (statistical selectivity)                */
-/* ================================================================== */
 function MonosemanticNeuronPanel({
   neurons,
   words,
@@ -2616,10 +2574,6 @@ function MonosemanticNeuronPanel({
     </motion.div>
   );
 }
-
-/* ================================================================== */
-/*  "TRY IT YOURSELF" — live probe w/ overlay against categories       */
-/* ================================================================== */
 
 /* Error boundary for Try-It-Yourself (catches render crashes) */
 class TryItErrorBoundary extends React.Component<
@@ -3056,9 +3010,6 @@ function TryItYourself({
   );
 }
 
-/* ================================================================== */
-/*  MAIN PAGE                                                          */
-/* ================================================================== */
 export function MonosemanticityPage() {
   const [precomputed, setPrecomputed] = useState<PrecomputedData | null>(null);
   const [loadingData, setLoadingData] = useState(true);

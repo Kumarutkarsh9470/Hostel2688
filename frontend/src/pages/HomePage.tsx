@@ -14,9 +14,6 @@ import {
 } from "lucide-react";
 import { spring, fadeUp, scaleUp, stagger } from "../utils/motion";
 
-/* ═══════════════════════════════════════════════════════════════
-   WIREFRAME TERRAIN — full-bleed green mesh hills
-   ═══════════════════════════════════════════════════════════════ */
 function WireframeTerrain() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef(0);
@@ -111,9 +108,6 @@ function WireframeTerrain() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   LIQUID BLOBS — floating, morphing orbs with spring feel
-   ═══════════════════════════════════════════════════════════════ */
 function LiquidBlobs() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -169,9 +163,6 @@ function LiquidBlobs() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   HERO ACTIVATION SIGNATURE — real neuron data from hero_tokens
-   ═══════════════════════════════════════════════════════════════ */
 interface HeroToken {
   sent: number;
   tok: number;
@@ -182,7 +173,6 @@ interface HeroToken {
   y: number[][]; // 4 heads × 3072
 }
 
-/** Group 50 hero files into tokens, each with 6 layers */
 interface TokenGroup {
   char: string;
   tok: number;
@@ -344,9 +334,6 @@ function HeroActivation() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   EQUATIONS — render BDH core equations from meta.json
-   ═══════════════════════════════════════════════════════════════ */
 function EquationBlock() {
   const equations = [
     {
@@ -399,7 +386,6 @@ function EquationBlock() {
   );
 }
 
-/** Lightweight TeX → HTML (no KaTeX dependency needed) */
 function texToHtml(tex: string): string {
   return tex
     .replace(
@@ -417,9 +403,6 @@ function texToHtml(tex: string): string {
     .replace(/\^\{([^}]+)\}/g, '<sup style="font-size:0.7em">$1</sup>');
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DATA
-   ═══════════════════════════════════════════════════════════════ */
 const features = [
   {
     path: "/architecture",
@@ -509,16 +492,13 @@ const differentiators = [
   },
 ];
 
-/* ═══════════════════════════════════════════════════════════════
-   HOME PAGE
-   ═══════════════════════════════════════════════════════════════ */
 export function HomePage() {
   return (
     <div
       className="min-h-screen overflow-x-hidden"
       style={{ background: "#070D12" }}
     >
-      {/* ═══ HERO ═══ */}
+      {/* HERO */}
       <section className="relative h-screen min-h-[700px] flex flex-col items-center justify-center overflow-hidden">
         <WireframeTerrain />
         <LiquidBlobs />
@@ -646,7 +626,7 @@ export function HomePage() {
         </motion.div>
       </section>
 
-      {/* ═══ STATS ═══ */}
+      {/* STATS */}
       <motion.section
         className="py-16 px-8"
         style={{
@@ -680,7 +660,7 @@ export function HomePage() {
         </div>
       </motion.section>
 
-      {/* ═══ CORE EQUATIONS ═══ */}
+      {/* CORE EQUATIONS */}
       <motion.section
         className="py-16 px-8"
         initial="hidden"
@@ -706,7 +686,7 @@ export function HomePage() {
         <EquationBlock />
       </motion.section>
 
-      {/* ═══ FEATURES GRID ═══ */}
+      {/* FEATURES GRID */}
       <motion.section
         className="relative py-24 px-8 overflow-hidden"
         initial="hidden"
@@ -810,7 +790,7 @@ export function HomePage() {
         </div>
       </motion.section>
 
-      {/* ═══ DIFFERENTIATORS ═══ */}
+      {/* DIFFERENTIATORS */}
       <motion.section
         className="py-24 px-8"
         initial="hidden"
@@ -880,7 +860,7 @@ export function HomePage() {
         </div>
       </motion.section>
 
-      {/* ═══ CTA FOOTER ═══ */}
+      {/* CTA FOOTER */}
       <section className="relative py-32 px-8 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"

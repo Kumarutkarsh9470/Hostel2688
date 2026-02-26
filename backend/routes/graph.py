@@ -1,15 +1,4 @@
-"""
-Graph Brain API — Fully Performance Optimized
-
-Bottleneck fixes:
-1. G* computed once per (model,head), cached as numpy
-2. Edge filtering 100% vectorized — zero Python loops on millions of entries
-3. Louvain fed via scipy.sparse CSR matrix (10-50x faster than add_edges_from)
-4. Display edges capped at 800 (WebGL limit for smooth 60fps)
-5. Display nodes capped at 200
-6. Histogram sampled from pre-cached G*
-7. Activation endpoint uses precomputed cluster masks
-"""
+"""Graph brain API with cached G* and vectorized Louvain clustering."""
 
 import json
 import time
@@ -48,7 +37,6 @@ class ActivateRequest(BaseModel):
     layer: int = -1
 
 
-# ── Caches ──────────────────────────────────────────────────────────────
 _gstar: Dict[str, np.ndarray] = {}
 _clusters: Dict[str, Dict] = {}
 _v1_models: Dict[str, Any] = {}
@@ -96,8 +84,6 @@ def get_gstar(model, cfg, head: int, mname: str) -> np.ndarray:
         print(f"[GRAPH] G* head={head} {time.perf_counter()-t:.2f}s N={N}")
     return _gstar[k]
 
-
-# ── Core clustering ─────────────────────────────────────────────────────
 
 def compute(G: np.ndarray, N: int, beta: float):
     t0 = time.perf_counter()
@@ -265,8 +251,6 @@ def _empty_result(N, beta, ncl, modul, meta, labels):
             "clusters": meta, "histogram": [], "_labels": labels}
 
 
-# ── Endpoints ───────────────────────────────────────────────────────────
-
 @router.get("/clusters/{model_name}")
 def get_clusters(model_name: str, req: Request, head: int = 0, beta: float = 0.1, max_nodes: int = MAX_VIZ_NODES):
     svc = req.app.state.model_service
@@ -349,7 +333,6 @@ def activate(request: ActivateRequest, req: Request):
     display_node_ids = set(nd["id"] for nd in cd["nodes"])
     display_node_list = sorted(display_node_ids)
 
-    # ── SURPRISE NORMALIZATION ──
     # Compute mean activation per display neuron across *all* tokens
     # so neurons that fire identically for every token get downweighted,
     # and neurons unique to THIS token get boosted.

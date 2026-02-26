@@ -2,17 +2,10 @@
 # Modified for BDH Interpretability Suite with extraction hooks
 
 """
-BDH (Baby Dragon Hatchling) Model Architecture
+BDH (Baby Dragon Hatchling) model architecture with extraction hooks
+for interpretability analysis.
 
-This module implements the BDH architecture with built-in hooks for
-interpretability analysis. It captures:
-- Sparse activations (x_sparse, y_sparse)
-- Attention patterns
-- Hebbian state evolution
-- Graph topology from weights
-
-Based on the official implementation from:
-https://github.com/pathwaycom/bdh
+Based on: https://github.com/pathwaycom/bdh
 """
 
 import dataclasses

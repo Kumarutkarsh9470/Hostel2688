@@ -26,7 +26,6 @@ import ForceGraph3D from "react-force-graph-3d";
 import * as THREE from "three";
 import { api } from "../utils/api";
 
-// ─── WebGL check ────────────────────────────────────────────────────
 function isWebGLAvailable(): boolean {
   try {
     const c = document.createElement("canvas");
@@ -36,7 +35,6 @@ function isWebGLAvailable(): boolean {
   }
 }
 
-// ─── Error Boundary — catches Three.js / WebGL runtime crashes ──────
 class GraphErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: string }
@@ -76,7 +74,6 @@ class GraphErrorBoundary extends React.Component<
   }
 }
 
-// ─── Static graph data loader (fallback when backend is down) ───────
 async function loadStaticGraph(head: number): Promise<ClusterData | null> {
   try {
     const r = await fetch(`/graph/gstar_head${head}.json`);
@@ -172,7 +169,6 @@ async function loadStaticGraph(head: number): Promise<ClusterData | null> {
   }
 }
 
-// ─── Types ─────────────────────────────────────────────────────────────
 interface ClusterMeta {
   cluster_id: number;
   neuron_count: number;
@@ -232,7 +228,6 @@ interface ActResult {
   node_activations: Record<string, number>;
 }
 
-// ─── Colors ────────────────────────────────────────────────────────────
 const CC = [
   "#3a3f4b",
   "#8B5CF6",
@@ -265,7 +260,6 @@ function hexToRgb(hex: string): [number, number, number] {
     : [128, 128, 128];
 }
 
-// ─── Histogram ─────────────────────────────────────────────────────────
 function Hist({
   data,
   beta,
@@ -306,7 +300,6 @@ function Hist({
   );
 }
 
-// ─── Cluster Pill ──────────────────────────────────────────────────────
 function Pill({
   c,
   act,
@@ -423,9 +416,6 @@ function Pill({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// MAIN
-// ═══════════════════════════════════════════════════════════════════════
 export function GraphPage() {
   const [cd, setCd] = useState<ClusterData | null>(null);
   const [ar, setAr] = useState<ActResult | null>(null);
@@ -453,7 +443,7 @@ export function GraphPage() {
 
   const PLAYBACK_DELAY = 400; // ms per token
 
-  // ── Cleanup WebGL context on unmount to prevent context leaks ──
+  // cleanup WebGL on unmount
   useEffect(() => {
     return () => {
       const fg = gRef.current;
@@ -481,7 +471,6 @@ export function GraphPage() {
     };
   }, []);
 
-  // ── Load clusters ──
   const load = useCallback(async (h: number, b: number) => {
     setLoading(true);
     setError(null);
@@ -520,7 +509,6 @@ export function GraphPage() {
     load(head, beta);
   }, [head]); // eslint-disable-line
 
-  // ── Auto-fit camera ONCE to show full brain ──
   const hasZoomed = useRef(false);
   const doZoomToFit = useCallback(() => {
     if (hasZoomed.current) return;
@@ -538,14 +526,12 @@ export function GraphPage() {
     return () => clearTimeout(t);
   }, [cd, doZoomToFit]);
 
-  // ── Beta debounce ──
   useEffect(() => {
     if (bTimer.current) clearTimeout(bTimer.current);
     bTimer.current = setTimeout(() => load(head, beta), 700);
     return () => clearTimeout(bTimer.current);
   }, [beta]); // eslint-disable-line
 
-  // ── Inference: run text, then start auto-playback ──
   const run = useCallback(async () => {
     if (!text.trim() || !cd) return;
     setActivating(true);
@@ -570,7 +556,6 @@ export function GraphPage() {
     }
   }, [text, head, layer, cd]);
 
-  // ── Auto-play timer — advances token index automatically ──
   useEffect(() => {
     if (pTimer.current) clearInterval(pTimer.current);
     if (playing && ar && pIdx >= 0) {
@@ -589,7 +574,6 @@ export function GraphPage() {
     };
   }, [playing, ar]); // eslint-disable-line
 
-  // ── Current token data ──
   const curTok =
     pIdx >= 0 && ar && pIdx < ar.per_token.length ? ar.per_token[pIdx] : null;
   const curMap: Record<number, number> = {};
@@ -608,14 +592,12 @@ export function GraphPage() {
     }
   }
 
-  // ── Node → cluster lookup ──
   const nodeClMap = useMemo(() => {
     const m: Record<number, number> = {};
     if (cd) for (const n of cd.nodes) m[n.id] = n.cluster;
     return m;
   }, [cd]);
 
-  // ── Active clusters for current token (top-N by activation, not threshold) ──
   const activeClusters = useMemo(() => {
     const s = new Set<number>();
     if (!curTok || !cd) return s;
@@ -636,7 +618,6 @@ export function GraphPage() {
 
   const isPlayback = pIdx >= 0 && !!curTok;
 
-  // ═══ GRAPH DATA — nodes with cumulative activation, no pinned positions ═══
   const graphData = useMemo(() => {
     if (!cd) return { nodes: [], links: [] };
     const nodeActs = ar?.node_activations || {};
@@ -657,7 +638,6 @@ export function GraphPage() {
     return { nodes, links };
   }, [cd, ar, edges]);
 
-  // ═══ NODE THREE OBJECT — 3D spheres with emissive glow (Nilay style) ═══
   const nodeThreeObject = useCallback(
     (node: any) => {
       const cluster = node.cluster || 0;
@@ -703,7 +683,6 @@ export function GraphPage() {
     [hlCl, blinkIds],
   );
 
-  // ── Link color ──
   const linkColor = useCallback(
     (link: any) => {
       if (!edges) return "rgba(0,0,0,0)";
@@ -726,7 +705,6 @@ export function GraphPage() {
     }
   };
 
-  // ── Stop playback and clear when clicking cluster during playback ──
   const handleClusterClick = useCallback(
     (cid: number) => {
       if (isPlayback) {
@@ -745,7 +723,6 @@ export function GraphPage() {
     [isPlayback],
   );
 
-  // ═════════════════════════════════════════════════════════════════════
   return (
     <div
       className="h-full flex flex-row"
@@ -860,7 +837,7 @@ export function GraphPage() {
             </div>
           )}
 
-        {/* ── 3D Graph ── */}
+        {/* 3D Graph */}
         <div
           ref={containerRef}
           className="flex-1 relative mx-5 mb-1.5 rounded-xl overflow-hidden border border-gray-800/40 bg-[#07070c]"
@@ -990,7 +967,7 @@ export function GraphPage() {
           )}
         </div>
 
-        {/* ── Inference input ── */}
+        {/* Inference input */}
         <div className="px-5 pb-3 flex-shrink-0">
           <div className="glass-card p-2">
             <div className="flex items-center gap-1 mb-1">
@@ -1092,7 +1069,7 @@ export function GraphPage() {
         </div>
       </div>
 
-      {/* ── RIGHT SIDEBAR ── */}
+      {/* RIGHT SIDEBAR */}
       <aside className="w-64 border-l border-gray-800/50 bg-gray-900/30 flex flex-col overflow-hidden flex-shrink-0">
         <div className="p-2 border-b border-gray-800/50 flex-shrink-0">
           <div className="flex items-center justify-between">

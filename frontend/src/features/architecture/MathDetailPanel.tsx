@@ -4,8 +4,6 @@ import { X } from "lucide-react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 
-// ─── Data interfaces (re-used from BDHArchitectureDiagram) ──────────────────
-
 interface FrameData {
   token_idx: number;
   token_char: string;
@@ -94,8 +92,6 @@ interface MathDetailPanelProps {
   currentLayer: number;
 }
 
-// ─── KaTeX rendering helper ─────────────────────────────────────────────────
-
 function Tex({ math, display = false }: { math: string; display?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
@@ -113,8 +109,6 @@ function Tex({ math, display = false }: { math: string; display?: boolean }) {
   }, [math, display]);
   return <span ref={ref} />;
 }
-
-// ─── Block definitions ──────────────────────────────────────────────────────
 
 const BLOCK_META: Record<
   number,
@@ -162,8 +156,6 @@ const BLOCK_META: Record<
   },
   12: { name: "Output", color: "#A78BFA", accentBg: "rgba(167,139,250,0.06)" },
 };
-
-// ─── Main Component ─────────────────────────────────────────────────────────
 
 export function MathDetailPanel({
   selectedBlock,
@@ -279,8 +271,6 @@ export function MathDetailPanel({
   );
 }
 
-// ─── Section wrapper ────────────────────────────────────────────────────────
-
 function Section({
   title,
   color,
@@ -314,8 +304,6 @@ function Section({
   );
 }
 
-// ─── Stat row ───────────────────────────────────────────────────────────────
-
 function Stat({
   label,
   value,
@@ -335,8 +323,6 @@ function Stat({
     </div>
   );
 }
-
-// ─── Mini bar chart ─────────────────────────────────────────────────────────
 
 function MiniBarChart({
   data,
@@ -373,8 +359,6 @@ function MiniBarChart({
     </div>
   );
 }
-
-// ─── Neurons table ──────────────────────────────────────────────────────────
 
 function NeuronTable({
   neurons,
@@ -423,8 +407,6 @@ function NeuronTable({
   );
 }
 
-// ─── Vector viz (mini heatmap as colored divs) ──────────────────────────────
-
 function VectorViz({
   values,
   height = 18,
@@ -453,8 +435,6 @@ function VectorViz({
     </div>
   );
 }
-
-// ─── Block Equations ────────────────────────────────────────────────────────
 
 function BlockEquation({
   step,
@@ -538,8 +518,6 @@ function BlockEquation({
     </div>
   );
 }
-
-// ─── Block Live Data ────────────────────────────────────────────────────────
 
 function BlockLiveData({
   step,
@@ -1060,8 +1038,6 @@ function BlockLiveData({
   }
 }
 
-// ─── Block Interpretations ──────────────────────────────────────────────────
-
 function BlockInterpretation({ step }: { step: number }) {
   const interpretations: Record<number, string> = {
     0: "BDH uses byte-level tokenization — no subword vocabulary needed. Every UTF-8 byte (0–255) is a token. This means the model sees raw character data and must learn language structure from scratch, making it truly interpretable at the lowest level.",
@@ -1083,8 +1059,6 @@ function BlockInterpretation({ step }: { step: number }) {
   if (!text) return <span className="text-xs text-[#4A5568]">—</span>;
   return <p className="text-xs text-[#8B95A5] leading-relaxed">{text}</p>;
 }
-
-// ─── Utility components ─────────────────────────────────────────────────────
 
 function NoData() {
   return (

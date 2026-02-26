@@ -1,10 +1,4 @@
-"""
-Sparsity Analysis API
-
-Dedicated endpoint for the Sparse Brain Comparator.
-Returns real BDH sparsity from live inference alongside
-reference transformer activation data from published literature.
-"""
+"""Sparsity analysis endpoint."""
 
 import random
 import torch
@@ -15,7 +9,6 @@ from typing import List, Optional
 router = APIRouter()
 
 
-# ── Reference transformer data (from published literature) ──────────────
 # Sources:
 #   - Elhage et al., "Softmax Linear Units", Anthropic 2022
 #   - Anthropic Mechanistic Interpretability team, 2023
@@ -28,8 +21,6 @@ TRANSFORMER_REFERENCE = {
             "ReLU/GELU rarely zero out neurons; attention layers are dense by design.",
 }
 
-
-# ── Models ──────────────────────────────────────────────────────────────
 
 class SparsityRequest(BaseModel):
     text: str = Field(..., description="Input text to analyze")
@@ -68,8 +59,6 @@ class SparsityResponse(BaseModel):
     # Transformer reference
     transformer_reference: dict
 
-
-# ── Endpoint ────────────────────────────────────────────────────────────
 
 @router.post("/analyze", response_model=SparsityResponse)
 def analyze_sparsity(request: SparsityRequest, req: Request):

@@ -67,11 +67,10 @@ export const focusCardInteraction = {
 
 /** Fade up with spring — standard reveal */
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 32, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 32 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
       ...spring.default,
       delay: i * 0.08,
@@ -91,11 +90,10 @@ export const fadeLeft: Variants = {
 
 /** Scale up — cards, modals */
 export const scaleUp: Variants = {
-  hidden: { opacity: 0, scale: 0.92, filter: "blur(6px)" },
+  hidden: { opacity: 0, scale: 0.92 },
   visible: (i: number = 0) => ({
     opacity: 1,
     scale: 1,
-    filter: "blur(0px)",
     transition: { ...spring.default, delay: i * 0.06 },
   }),
 };
@@ -110,17 +108,15 @@ export const stagger: Variants = {
 
 /** Page transition — used in AnimatePresence around Outlet */
 export const pageTransition: Variants = {
-  initial: { opacity: 0, y: 16, filter: "blur(6px)" },
+  initial: { opacity: 0, y: 16 },
   animate: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: spring.default,
   },
   exit: {
     opacity: 0,
     y: -8,
-    filter: "blur(4px)",
     transition: { duration: 0.2, ease: "easeIn" },
   },
 };

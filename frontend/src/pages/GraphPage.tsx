@@ -1,4 +1,10 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Play,
   Pause,
@@ -19,6 +25,152 @@ import {
 import ForceGraph3D from "react-force-graph-3d";
 import * as THREE from "three";
 import { api } from "../utils/api";
+
+// ─── WebGL check ────────────────────────────────────────────────────
+function isWebGLAvailable(): boolean {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+// ─── Error Boundary — catches Three.js / WebGL runtime crashes ──────
+class GraphErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: string }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: "" };
+  }
+  static getDerivedStateFromError(err: Error) {
+    return { hasError: true, error: err.message || "3D render failed" };
+  }
+  componentDidCatch(err: Error) {
+    console.warn("[GraphPage] ErrorBoundary caught:", err);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#07070c]">
+          <AlertCircle className="w-8 h-8 text-yellow-500/70" />
+          <p className="text-[#8B95A5] text-sm font-medium">
+            3D visualization could not render
+          </p>
+          <p className="text-[#4A5568] text-xs max-w-xs text-center">
+            WebGL error: {this.state.error}. Try a Chromium-based browser with
+            hardware acceleration enabled.
+          </p>
+          <button
+            onClick={() => this.setState({ hasError: false, error: "" })}
+            className="mt-2 px-4 py-1.5 bg-[#00C896]/10 border border-[#00C896]/20 text-[#00C896] text-xs rounded-lg hover:bg-[#00C896]/20 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── Static graph data loader (fallback when backend is down) ───────
+async function loadStaticGraph(head: number): Promise<ClusterData | null> {
+  try {
+    const r = await fetch(`/graph/gstar_head${head}.json`);
+    if (!r.ok) return null;
+    const raw = await r.json();
+
+    const clusterMap: Record<string, number[]> = raw.clusters || {};
+    const cids = Object.keys(clusterMap)
+      .map(Number)
+      .sort((a, b) => a - b);
+    const N: number = raw.N || 3072;
+
+    const labels = new Array(N).fill(0);
+    for (const [cid, members] of Object.entries(clusterMap)) {
+      for (const nid of members) {
+        if (nid < N) labels[nid] = Number(cid);
+      }
+    }
+
+    const rawEdges = (raw.edges || []).slice(0, 800);
+    const edges = rawEdges.map((e: number[]) => ({
+      source: e[0],
+      target: e[1],
+      weight: +(e[2] || 0.1),
+      same_cluster: labels[e[0]] === labels[e[1]] && labels[e[0]] > 0,
+    }));
+
+    const nodeSet = new Set<number>();
+    for (const e of edges) {
+      nodeSet.add(e.source);
+      nodeSet.add(e.target);
+    }
+    const hubSet = new Set<number>((raw.hubs || []).map((h: number[]) => h[0]));
+    for (const h of hubSet) nodeSet.add(h);
+
+    const picked = Array.from(nodeSet).slice(0, 200);
+    const pickedSet = new Set(picked);
+
+    const degMap: Record<number, number> = {};
+    for (const e of edges) {
+      degMap[e.source] = (degMap[e.source] || 0) + 1;
+      degMap[e.target] = (degMap[e.target] || 0) + 1;
+    }
+
+    const nodes = picked.map((id) => ({
+      id,
+      cluster: labels[id] ?? 0,
+      degree: degMap[id] || 0,
+      is_hub: hubSet.has(id),
+    }));
+    const filteredEdges = edges.filter(
+      (e: any) => pickedSet.has(e.source) && pickedSet.has(e.target),
+    );
+
+    const clusters: ClusterMeta[] = cids.map((cid) => {
+      const members = clusterMap[String(cid)] || [];
+      return {
+        cluster_id: cid,
+        neuron_count: members.length,
+        avg_out_degree: 0,
+        avg_in_degree: 0,
+        internal_edges: 0,
+        internal_weight: 0,
+        hub_neurons: members
+          .filter((n) => hubSet.has(n))
+          .slice(0, 3)
+          .map((n) => ({ neuron: n, degree: degMap[n] || 0 })),
+        label: cid === 0 ? "Isolated" : `Cluster ${cid}`,
+      };
+    });
+
+    const hist = (raw.out_deg_hist || []).map((y: number, i: number) => ({
+      x: +(i * (raw.threshold || 0.07)).toFixed(4),
+      y,
+    }));
+
+    return {
+      n_neurons: N,
+      n_display_nodes: nodes.length,
+      n_display_edges: filteredEdges.length,
+      n_total_edges: raw.n_edges || filteredEdges.length,
+      num_clusters: raw.n_clusters || cids.length,
+      modularity: raw.modularity || 0,
+      beta: raw.threshold || 0.07,
+      nodes,
+      edges: filteredEdges,
+      clusters,
+      histogram: hist,
+    };
+  } catch (err) {
+    console.warn("[GraphPage] static fallback failed:", err);
+    return null;
+  }
+}
 
 // ─── Types ─────────────────────────────────────────────────────────────
 interface ClusterMeta {
@@ -108,7 +260,9 @@ const ci = (cid: number) => (cid <= 0 ? 0 : ((cid - 1) % (CC.length - 1)) + 1);
 
 function hexToRgb(hex: string): [number, number, number] {
   const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return r ? [parseInt(r[1], 16), parseInt(r[2], 16), parseInt(r[3], 16)] : [128, 128, 128];
+  return r
+    ? [parseInt(r[1], 16), parseInt(r[2], 16), parseInt(r[3], 16)]
+    : [128, 128, 128];
 }
 
 // ─── Histogram ─────────────────────────────────────────────────────────
@@ -315,7 +469,20 @@ export function GraphPage() {
       setCd(r.data);
       hasZoomed.current = false;
     } catch (e: any) {
-      setError(e?.response?.data?.detail || e?.message || "Failed");
+      console.warn("[GraphPage] Backend failed, trying static fallback...");
+      // Try static gstar JSON as fallback
+      const staticData = await loadStaticGraph(h);
+      if (staticData) {
+        setCd(staticData);
+        hasZoomed.current = false;
+        setError(null); // Clear error — static data loaded OK
+      } else {
+        setError(
+          e?.response?.data?.detail ||
+            e?.message ||
+            "Backend unavailable and no static data",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -324,8 +491,6 @@ export function GraphPage() {
   useEffect(() => {
     load(head, beta);
   }, [head]); // eslint-disable-line
-
-
 
   // ── Auto-fit camera ONCE to show full brain ──
   const hasZoomed = useRef(false);
@@ -404,13 +569,14 @@ export function GraphPage() {
   if (curTok) {
     // Sort activations to find the top cluster
     const sorted = [...curTok.cluster_activations]
-      .filter(ca => ca.cluster_id > 0 && ca.activation > 0)
+      .filter((ca) => ca.cluster_id > 0 && ca.activation > 0)
       .sort((a, b) => b.activation - a.activation);
     const topAct = sorted.length > 0 ? sorted[0].activation : 1;
     for (const ca of curTok.cluster_activations) {
       curMap[ca.cluster_id] = ca.normalized;
       // Only blink if this cluster has >= 40% of the top cluster's activation
-      if (ca.activation >= topAct * 0.4 && ca.activation > 0) blinkIds.add(ca.cluster_id);
+      if (ca.activation >= topAct * 0.4 && ca.activation > 0)
+        blinkIds.add(ca.cluster_id);
     }
   }
 
@@ -421,15 +587,13 @@ export function GraphPage() {
     return m;
   }, [cd]);
 
-
-
   // ── Active clusters for current token (top-N by activation, not threshold) ──
   const activeClusters = useMemo(() => {
     const s = new Set<number>();
     if (!curTok || !cd) return s;
     // Sort cluster activations descending, pick only top clusters that are truly firing
     const sorted = [...curTok.cluster_activations]
-      .filter(ca => ca.cluster_id > 0 && ca.activation > 0)
+      .filter((ca) => ca.cluster_id > 0 && ca.activation > 0)
       .sort((a, b) => b.activation - a.activation);
     if (sorted.length === 0) return s;
     // Take top cluster, then include others only if they have >= 30% of top's activation
@@ -444,8 +608,6 @@ export function GraphPage() {
 
   const isPlayback = pIdx >= 0 && !!curTok;
 
-
-
   // ═══ GRAPH DATA — nodes with cumulative activation, no pinned positions ═══
   const graphData = useMemo(() => {
     if (!cd) return { nodes: [], links: [] };
@@ -456,8 +618,10 @@ export function GraphPage() {
     }));
     const links = edges
       ? cd.edges.map((e) => ({
-          source: typeof e.source === "object" ? (e.source as any).id : e.source,
-          target: typeof e.target === "object" ? (e.target as any).id : e.target,
+          source:
+            typeof e.source === "object" ? (e.source as any).id : e.source,
+          target:
+            typeof e.target === "object" ? (e.target as any).id : e.target,
           weight: e.weight,
           same_cluster: e.same_cluster,
         }))
@@ -493,11 +657,15 @@ export function GraphPage() {
 
       const geo = new THREE.SphereGeometry(size, 10, 10);
       const mat = new THREE.MeshLambertMaterial({
-        color: new THREE.Color(r / 255 * dim, g / 255 * dim, b / 255 * dim),
+        color: new THREE.Color(
+          (r / 255) * dim,
+          (g / 255) * dim,
+          (b / 255) * dim,
+        ),
         emissive: new THREE.Color(
-          r / 255 * emissiveStr,
-          g / 255 * emissiveStr,
-          b / 255 * emissiveStr,
+          (r / 255) * emissiveStr,
+          (g / 255) * emissiveStr,
+          (b / 255) * emissiveStr,
         ),
         transparent: dim < 1,
         opacity: dim < 1 ? 0.25 : 1,
@@ -673,35 +841,49 @@ export function GraphPage() {
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <Loader2 className="w-7 h-7 text-bdh-accent animate-spin" />
             </div>
+          ) : !isWebGLAvailable() ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <AlertCircle className="w-8 h-8 text-yellow-500/70" />
+              <p className="text-[#8B95A5] text-sm font-medium">
+                WebGL is not available
+              </p>
+              <p className="text-[#4A5568] text-xs max-w-xs text-center">
+                The 3D brain visualization requires WebGL. Enable hardware
+                acceleration in your browser settings or try a different
+                browser.
+              </p>
+            </div>
           ) : graphData.nodes.length > 0 ? (
-            <ForceGraph3D
-              ref={gRef}
-              graphData={graphData}
-              nodeThreeObject={nodeThreeObject}
-              nodeThreeObjectExtend={false}
-              linkColor={linkColor}
-              linkOpacity={0.25}
-              linkWidth={0.4}
-              backgroundColor="#07070c"
-              enableNodeDrag={true}
-              enableNavigationControls={true}
-              controlType="orbit"
-              nodeLabel={(n: any) =>
-                `#${n.id} · Cluster ${n.cluster} · Deg ${n.degree}${n.is_hub ? " (HUB)" : ""}`
-              }
-              onNodeClick={(n: any) =>
-                setHlCl((prev) => (prev === n.cluster ? null : n.cluster))
-              }
-              onBackgroundClick={() => setHlCl(null)}
-              onEngineStop={handleEngineStop}
-              showNavInfo={false}
-              d3AlphaDecay={0.025}
-              d3VelocityDecay={0.3}
-              warmupTicks={60}
-              cooldownTicks={180}
-              width={undefined}
-              height={undefined}
-            />
+            <GraphErrorBoundary>
+              <ForceGraph3D
+                ref={gRef}
+                graphData={graphData}
+                nodeThreeObject={nodeThreeObject}
+                nodeThreeObjectExtend={false}
+                linkColor={linkColor}
+                linkOpacity={0.25}
+                linkWidth={0.4}
+                backgroundColor="#07070c"
+                enableNodeDrag={true}
+                enableNavigationControls={true}
+                controlType="orbit"
+                nodeLabel={(n: any) =>
+                  `#${n.id} · Cluster ${n.cluster} · Deg ${n.degree}${n.is_hub ? " (HUB)" : ""}`
+                }
+                onNodeClick={(n: any) =>
+                  setHlCl((prev) => (prev === n.cluster ? null : n.cluster))
+                }
+                onBackgroundClick={() => setHlCl(null)}
+                onEngineStop={handleEngineStop}
+                showNavInfo={false}
+                d3AlphaDecay={0.025}
+                d3VelocityDecay={0.3}
+                warmupTicks={60}
+                cooldownTicks={180}
+                width={undefined}
+                height={undefined}
+              />
+            </GraphErrorBoundary>
           ) : (
             !loading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
@@ -712,7 +894,9 @@ export function GraphPage() {
                 <p className="text-[#4A5568] text-xs max-w-xs text-center">
                   The Graph Brain requires the backend to compute neuron
                   clusters. Start it with:{" "}
-                  <code className="text-[#00C896] text-[11px]">uvicorn backend.main:app --reload</code>
+                  <code className="text-[#00C896] text-[11px]">
+                    uvicorn backend.main:app --reload
+                  </code>
                 </p>
                 <button
                   onClick={() => load(head, beta)}

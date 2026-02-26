@@ -1077,14 +1077,14 @@ export function FindingsPage() {
         if (!r.ok) throw new Error(`precomputed.json: ${r.status}`);
         return r.json();
       }),
-      fetch("/merge/merge_eval.json")
-        .then((r) => {
-          if (!r.ok) return fetch("/merge/merge_data.json").then((r2) => {
+      fetch("/merge/merge_eval.json").then((r) => {
+        if (!r.ok)
+          return fetch("/merge/merge_data.json").then((r2) => {
             if (!r2.ok) throw new Error(`merge data: ${r2.status}`);
             return r2.json();
           });
-          return r.json();
-        }),
+        return r.json();
+      }),
     ])
       .then(([monoRaw, mergeRaw]) => {
         setMonoData(adaptMonoData(monoRaw) as unknown as PrecomputedData);
@@ -1118,7 +1118,12 @@ export function FindingsPage() {
     );
   }
 
-  const sel = monoData.selectivity ?? { histogram: [], total_neurons: 0, total_selective: 0, mean_selectivity: 0 };
+  const sel = monoData.selectivity ?? {
+    histogram: [],
+    total_neurons: 0,
+    total_selective: 0,
+    mean_selectivity: 0,
+  };
   const ft = mergeData.finetune_info;
   const probe = mergeData.heritage_probe?.summary;
   const nCats = Object.keys(monoData.concepts ?? {}).length;
@@ -1162,13 +1167,15 @@ export function FindingsPage() {
             <LossChart evaluation={mergeData.evaluation} />
           </div>
           {ft && (
-          <div className={`${CARD} md:col-span-2 flex flex-col justify-center`}>
-            <FinetuneMeter
-              preLoss={ft.pre_loss}
-              postLoss={ft.post_loss}
-              iters={ft.iters}
-            />
-          </div>
+            <div
+              className={`${CARD} md:col-span-2 flex flex-col justify-center`}
+            >
+              <FinetuneMeter
+                preLoss={ft.pre_loss}
+                postLoss={ft.post_loss}
+                iters={ft.iters}
+              />
+            </div>
           )}
         </div>
       </section>
@@ -1198,104 +1205,104 @@ export function FindingsPage() {
 
       {/* ── Heritage Routing ── */}
       {probe && (
-      <section>
-        <SectionHead
-          title="Heritage Routing"
-          sub="How well the merged model routes inputs to their parent-language neurons."
-        />
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className={`${CARD} flex items-center justify-center`}>
-            <RoutingDonut
-              frPct={probe.french_input_french_pct}
-              ptPct={probe.portuguese_input_portuguese_pct}
-              quality={probe.routing_quality}
-            />
-          </div>
-          <div className={`${CARD} md:col-span-2`}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  {
-                    label: "FR \u2192 FR neurons",
-                    value: probe.french_input_french_pct,
-                    color: C.french,
-                  },
-                  {
-                    label: "PT \u2192 PT neurons",
-                    value: probe.portuguese_input_portuguese_pct,
-                    color: C.portuguese,
-                  },
-                ].map((item) => (
-                  <div key={item.label}>
-                    <div className="flex justify-between text-xs text-[#8B95A5] mb-1">
-                      <span>{item.label}</span>
-                      <span className="text-white font-mono">
-                        {item.value.toFixed(1)}%
-                      </span>
+        <section>
+          <SectionHead
+            title="Heritage Routing"
+            sub="How well the merged model routes inputs to their parent-language neurons."
+          />
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className={`${CARD} flex items-center justify-center`}>
+              <RoutingDonut
+                frPct={probe.french_input_french_pct}
+                ptPct={probe.portuguese_input_portuguese_pct}
+                quality={probe.routing_quality}
+              />
+            </div>
+            <div className={`${CARD} md:col-span-2`}>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    {
+                      label: "FR \u2192 FR neurons",
+                      value: probe.french_input_french_pct,
+                      color: C.french,
+                    },
+                    {
+                      label: "PT \u2192 PT neurons",
+                      value: probe.portuguese_input_portuguese_pct,
+                      color: C.portuguese,
+                    },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <div className="flex justify-between text-xs text-[#8B95A5] mb-1">
+                        <span>{item.label}</span>
+                        <span className="text-white font-mono">
+                          {item.value.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="h-3 rounded-full bg-white/5 overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ background: item.color }}
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${item.value}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.8 }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-3 rounded-full bg-white/5 overflow-hidden">
-                      <motion.div
-                        className="h-full rounded-full"
-                        style={{ background: item.color }}
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${item.value}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="text-center pt-2">
-                <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium ${
-                    probe.clear_separation
-                      ? "bg-white/5 text-[#CBD5E0] border border-white/10"
-                      : "bg-white/5 text-[#8B95A5] border border-white/10"
-                  }`}
-                >
-                  {probe.clear_separation
-                    ? "Clear Separation Detected"
-                    : "No Clear Separation \u2014 Needs More Training"}
-                </span>
+                  ))}
+                </div>
+                <div className="text-center pt-2">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium ${
+                      probe.clear_separation
+                        ? "bg-white/5 text-[#CBD5E0] border border-white/10"
+                        : "bg-white/5 text-[#8B95A5] border border-white/10"
+                    }`}
+                  >
+                    {probe.clear_separation
+                      ? "Clear Separation Detected"
+                      : "No Clear Separation \u2014 Needs More Training"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* ── Sigma Replay ── */}
       {trackingCats.length > 0 && (
-      <section>
-        <SectionHead
-          title="Synapse \u03C3-Curve Replay"
-          sub="Cumulative sigma accumulated word-by-word as the model reads a sentence."
-        />
-        <div className={CARD}>
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {trackingCats.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveTrackCat(cat)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                  activeTrackCat === cat
-                    ? "bg-white/10 text-[#E2E8F0] border border-white/\[0.12\]"
-                    : "bg-transparent text-[#8B95A5] border border-white/10 hover:text-[#E2E8F0]"
-                }`}
-              >
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </button>
-            ))}
+        <section>
+          <SectionHead
+            title="Synapse \u03C3-Curve Replay"
+            sub="Cumulative sigma accumulated word-by-word as the model reads a sentence."
+          />
+          <div className={CARD}>
+            <div className="flex gap-2 mb-4 flex-wrap">
+              {trackingCats.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveTrackCat(cat)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    activeTrackCat === cat
+                      ? "bg-white/10 text-[#E2E8F0] border border-white/\[0.12\]"
+                      : "bg-transparent text-[#8B95A5] border border-white/10 hover:text-[#E2E8F0]"
+                  }`}
+                >
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </button>
+              ))}
+            </div>
+            {activeTrackCat && monoData.synapse_tracking?.[activeTrackCat] && (
+              <SigmaReplay
+                tracking={monoData.synapse_tracking[activeTrackCat]}
+                category={activeTrackCat}
+              />
+            )}
           </div>
-          {activeTrackCat && monoData.synapse_tracking?.[activeTrackCat] && (
-            <SigmaReplay
-              tracking={monoData.synapse_tracking[activeTrackCat]}
-              category={activeTrackCat}
-            />
-          )}
-        </div>
-      </section>
+        </section>
       )}
 
       {/* ── Cross-Concept Distinctness ── */}

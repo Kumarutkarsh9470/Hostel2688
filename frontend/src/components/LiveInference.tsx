@@ -23,8 +23,7 @@ export function LiveInference({ onDataReceived }: LiveInferenceProps) {
   const checkServerStatus = async () => {
     try {
       const apiOrigin =
-        (typeof import.meta !== "undefined" &&
-          import.meta.env?.VITE_API_URL) ||
+        (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
         "";
       const response = await fetch(`${apiOrigin}/health`, {
         method: "GET",
@@ -44,8 +43,7 @@ export function LiveInference({ onDataReceived }: LiveInferenceProps) {
 
     try {
       const apiOrigin =
-        (typeof import.meta !== "undefined" &&
-          import.meta.env?.VITE_API_URL) ||
+        (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
         "";
       const response = await fetch(`${apiOrigin}/api/inference/run`, {
         method: "POST",

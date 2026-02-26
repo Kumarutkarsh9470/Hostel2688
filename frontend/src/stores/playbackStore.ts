@@ -402,8 +402,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
 
     // Resolve API origin (in production the backend lives on a different domain)
     const apiOrigin =
-      (typeof import.meta !== "undefined" &&
-        import.meta.env?.VITE_API_URL) ||
+      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
       "";
 
     // Quick health check first (2s timeout)
@@ -456,16 +455,19 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-        const response = await fetch(`${apiOrigin}/api/visualization/playback`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text,
-            model_name: model,
-            include_attention: true,
-          }),
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          `${apiOrigin}/api/visualization/playback`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text,
+              model_name: model,
+              include_attention: true,
+            }),
+            signal: controller.signal,
+          },
+        );
 
         clearTimeout(timeoutId);
 

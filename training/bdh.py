@@ -367,8 +367,12 @@ class BDH(nn.Module):
             loss: Cross-entropy loss if targets provided, else None
         """
         C = self.config
-        extracting = self._extraction_config is not None
-        buffer = self._extraction_buffer
+        # ── Thread-safety: snapshot extraction state into locals ──
+        # Another thread may exit extraction_mode() and set self._extraction_config = None
+        # while this forward() is still running. Cache into local vars to prevent that.
+        ext_config = self._extraction_config
+        extracting = ext_config is not None
+        buffer = self._extraction_buffer if extracting else None
         
         B, T = idx.size()
         D = C.n_embd
@@ -394,7 +398,7 @@ class BDH(nn.Module):
             should_capture = (
                 extracting and 
                 buffer and 
-                self._extraction_config.should_capture_layer(layer_idx)
+                ext_config.should_capture_layer(layer_idx)
             ) if extracting else False
             
             # Get encoder/decoder for this layer (V1 shared or V2 per-layer)
@@ -411,8 +415,8 @@ class BDH(nn.Module):
             # Project to high-dimensional neuron space
             x_latent = x @ enc  # (B, nh, T, N)
             
-            if extracting and buffer and self._extraction_config.capture_pre_relu:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_pre_relu:
+                if ext_config.should_capture_layer(layer_idx):
                     buffer.x_pre_relu[layer_idx] = x_latent.clone()
             
             # === SPARSIFY: ReLU ===
@@ -420,14 +424,14 @@ class BDH(nn.Module):
             # ~95% of activations become zero here
             x_sparse = F.relu(x_latent)  # (B, nh, T, N)
             
-            if extracting and buffer and self._extraction_config.capture_sparse_activations:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_sparse_activations:
+                if ext_config.should_capture_layer(layer_idx):
                     buffer.x_sparse[layer_idx] = x_sparse.clone()
             
             # === ATTEND ===
             # Linear attention in sparse neuron space
-            if extracting and buffer and self._extraction_config.capture_attention_patterns:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_attention_patterns:
+                if ext_config.should_capture_layer(layer_idx):
                     yKV, scores = self.attn(Q=x_sparse, K=x_sparse, V=x, return_scores=True)
                     buffer.attention_scores[layer_idx] = scores.clone()
                 else:
@@ -444,15 +448,15 @@ class BDH(nn.Module):
             # === ENCODE V: D -> N ===
             y_latent = yKV @ enc_v  # (B, nh, T, N)
             
-            if extracting and buffer and self._extraction_config.capture_pre_relu:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_pre_relu:
+                if ext_config.should_capture_layer(layer_idx):
                     buffer.y_pre_relu[layer_idx] = y_latent.clone()
             
             # === SPARSIFY V ===
             y_sparse = F.relu(y_latent)  # (B, nh, T, N)
             
-            if extracting and buffer and self._extraction_config.capture_sparse_activations:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_sparse_activations:
+                if ext_config.should_capture_layer(layer_idx):
                     buffer.y_sparse[layer_idx] = y_sparse.clone()
             
             # === GATE ===
@@ -487,14 +491,14 @@ class BDH(nn.Module):
             y = self.ln(yMLP)
             
             # === RESIDUAL ===
-            if extracting and buffer and self._extraction_config.capture_residuals:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_residuals:
+                if ext_config.should_capture_layer(layer_idx):
                     buffer.residuals[layer_idx] = y.clone()
             
             x = self.ln(x + y)
             
-            if extracting and buffer and self._extraction_config.capture_layer_outputs:
-                if self._extraction_config.should_capture_layer(layer_idx):
+            if extracting and buffer and ext_config.capture_layer_outputs:
+                if ext_config.should_capture_layer(layer_idx):
                     buffer.layer_outputs[layer_idx] = x.clone()
         
         # Final projection to vocabulary

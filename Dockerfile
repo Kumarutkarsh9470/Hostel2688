@@ -11,10 +11,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy only what the backend needs
+# Copy backend code and training module
 COPY backend/        backend/
 COPY training/bdh.py training/bdh.py
-COPY checkpoints/    checkpoints/
+
+# ── Checkpoints ──
+# On HF Spaces, checkpoints land inside backend/checkpoints/ after COPY.
+# The Python code expects them at /app/checkpoints/.
+# Create a symlink so both paths resolve to the same files.
+RUN ln -sfn /app/backend/checkpoints /app/checkpoints
 
 # HuggingFace Spaces requires port 7860
 EXPOSE 7860

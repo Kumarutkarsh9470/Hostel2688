@@ -453,6 +453,34 @@ export function GraphPage() {
 
   const PLAYBACK_DELAY = 400; // ms per token
 
+  // ── Cleanup WebGL context on unmount to prevent context leaks ──
+  useEffect(() => {
+    return () => {
+      const fg = gRef.current;
+      if (fg) {
+        // ForceGraph3D exposes the Three.js renderer via internal methods
+        try {
+          const renderer = fg.renderer?.();
+          if (renderer) {
+            renderer.dispose();
+            renderer.forceContextLoss();
+            const gl = renderer.getContext();
+            const ext = gl?.getExtension("WEBGL_lose_context");
+            if (ext) ext.loseContext();
+          }
+        } catch {
+          // Best-effort cleanup
+        }
+        // Also stop the force simulation
+        try {
+          fg.pauseAnimation?.();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+  }, []);
+
   // ── Load clusters ──
   const load = useCallback(async (h: number, b: number) => {
     setLoading(true);

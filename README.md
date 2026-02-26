@@ -1,6 +1,6 @@
 # BDH Interpretability Suite
 
-**KRITI 2026 -- AI Interpretability Challenge | Team 2688**
+**KRITI 2026 -- AI Interpretability Challenge |**
 
 An interactive visualization and interpretability platform for the BDH (Baby Dragon Hatchling) post-transformer architecture. This project delivers a complete pipeline: training BDH models from scratch on multilingual data, extracting every internal signal the architecture exposes, and rendering those signals in a 9-page interactive frontend with live backend inference.
 
@@ -521,4 +521,4 @@ Model checkpoints are included in the Docker image. The `hf_space_README.md` fil
 
 ---
 
-**Team 2688 -- KRITI 2026 AI Interpretability Challenge**
+**KRITI 2026 AI Interpretability Challenge**

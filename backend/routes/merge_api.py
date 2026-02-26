@@ -68,7 +68,10 @@ def heritage_probe(request: HeritageProbeRequest, req: Request):
             400, f"Model '{model_name}' has no heritage info — is it a merged model?")
 
     config = model_service.get_config(model_name)
-    N_orig = heritage["neurons_per_head_original"]
+    # neurons_per_head_original is total neurons across all heads from the
+    # source specialist.  Convert to per-head for the split index.
+    N_orig_total = heritage["neurons_per_head_original"]
+    N_orig = N_orig_total // config.n_head  # per-head split index
     device = model_service.device
 
     # Tokenize

@@ -976,24 +976,20 @@ function HeritageProbe({
     setProbing(true);
     setError("");
     try {
-      // Try fine-tuned first, fall back to merged_polyglot
-      let model = "merged_finetuned";
-      let res = await fetch(`${API}/heritage-probe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, model_name: model }),
-      });
-      if (!res.ok) {
-        model = "merged_polyglot";
+      // Try model names in order until one succeeds
+      const modelCandidates = ["merged", "merged_finetuned", "merged_polyglot"];
+      let res: Response | null = null;
+      for (const m of modelCandidates) {
         res = await fetch(`${API}/heritage-probe`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, model_name: model }),
+          body: JSON.stringify({ text, model_name: m }),
         });
+        if (res.ok) break;
       }
-      if (!res.ok)
+      if (!res || !res.ok)
         throw new Error(
-          "Backend unavailable – heritage probe requires a running API server.",
+          "Heritage probe failed – no merged model available on the server.",
         );
       setResult(await res.json());
     } catch (e: any) {

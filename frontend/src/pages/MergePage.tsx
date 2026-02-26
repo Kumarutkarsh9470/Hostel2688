@@ -432,7 +432,6 @@ export function MergePage() {
       {probeData && h && (
         <PrecomputedHeritageProbe probe={probeData} heritage={h} />
       )}
-      {h && <HeritageProbe heritage={h} backendAvailable={backendAvailable} />}
       <LiveGeneration backendAvailable={backendAvailable} />
       <InsightPanel hasFT={!!hasFT} />
     </div>

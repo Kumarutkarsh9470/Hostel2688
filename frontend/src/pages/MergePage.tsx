@@ -350,11 +350,11 @@ export function MergePage() {
   const [backendAvailable, setBackendAvailable] = useState(false);
 
   useEffect(() => {
-    // Try new merge_eval.json first, fall back to old merge_data.json
-    fetch("/merge/merge_eval.json")
+    // Try merge_data.json first (richer format with all models), fall back to merge_eval.json
+    fetch("/merge/merge_data.json")
       .then((r) => {
         if (!r.ok)
-          return fetch("/merge/merge_data.json").then((r2) => r2.json());
+          return fetch("/merge/merge_eval.json").then((r2) => r2.json());
         return r.json();
       })
       .then((raw) => {
@@ -641,7 +641,6 @@ function ModelCards({
             transition={{ delay: 0.1 * i }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs">{m.flag}</span>
               <span className="font-semibold text-[#E2E8F0]">{m.name}</span>
             </div>
             <div className="space-y-1.5 text-sm">
@@ -652,7 +651,7 @@ function ModelCards({
                 value={`${m.n_layers} x ${m.n_heads}`}
               />
               <Row label="Embedding dim" value={String(m.n_embd)} />
-              {ev && (
+              {ev && (ev.french_loss !== null || ev.portuguese_loss !== null) && (
                 <>
                   <div className="border-t border-white/[0.06] my-2" />
                   <Row

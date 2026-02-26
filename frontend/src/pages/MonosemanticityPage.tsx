@@ -1599,7 +1599,7 @@ function SelectivityView({
           Near 0.5 = non-selective.
         </p>
 
-        <div className="flex items-end gap-[3px] h-32">
+        <div className="flex items-stretch gap-[3px] h-32">
           {histogram.map((bin, i) => {
             const h = (bin.count / maxCount) * 100;
             const isHighSel = bin.bin_start >= 0.75;
@@ -1607,7 +1607,7 @@ function SelectivityView({
             return (
               <motion.div
                 key={i}
-                className="flex-1 flex flex-col items-center"
+                className="flex-1 flex flex-col items-center justify-end"
                 initial={{ scaleY: 0 }}
                 animate={{ scaleY: 1 }}
                 transition={{ delay: i * 0.03, duration: 0.3 }}
@@ -2755,53 +2755,65 @@ function TryItYourself({
     return count;
   }, [liveSharedNeurons]);
 
-  // Category affinity
+  // Category affinity — uses top_neurons overlap (not x_ds which has
+  // incompatible dimensions between live probe and precomputed data)
   const categoryOverlap = useMemo(() => {
     if (!liveResult || !precomputed) return null;
     if (!liveResult.words || liveResult.words.length === 0) return null;
 
     try {
-      const userVecs: number[][] = [];
+      // Collect user's top neuron indices as a set of "head:idx" keys,
+      // with max activation value across all probed words
+      const userNeurons = new Map<string, number>();
       liveResult.words.forEach((uw) => {
         if (!uw.layers) return;
         const uLayer = uw.layers.find((l) => l.layer === selectedLayer);
         if (!uLayer || !uLayer.heads) return;
-        userVecs.push(uLayer.heads.flatMap((h) => h.x_ds ?? []));
+        uLayer.heads.forEach((h) => {
+          (h.top_neurons ?? []).forEach((n) => {
+            const key = `${h.head}:${n.idx}`;
+            const val = Math.abs(n.raw ?? n.val);
+            userNeurons.set(key, Math.max(userNeurons.get(key) ?? 0, val));
+          });
+        });
       });
-      if (userVecs.length === 0 || userVecs[0].length === 0) return null;
+      if (userNeurons.size === 0) return null;
 
-      const dim = userVecs[0].length;
-      const avgUser = new Array(dim).fill(0);
-      userVecs.forEach((v) => v.forEach((val, j) => (avgUser[j] += val)));
-      avgUser.forEach((_, j) => (avgUser[j] /= userVecs.length));
-
-      const cosine = (a: number[], b: number[]) => {
-        let dot = 0,
-          na = 0,
-          nb = 0;
-        for (let k = 0; k < a.length; k++) {
-          dot += a[k] * b[k];
-          na += a[k] * a[k];
-          nb += b[k] * b[k];
-        }
-        const denom = Math.sqrt(na) * Math.sqrt(nb);
-        return denom > 0 ? dot / denom : 0;
-      };
-
+      // For each precomputed concept, compute cosine similarity using
+      // sparse neuron-index representations (shared between both formats)
       const overlaps: { concept: string; similarity: number }[] = [];
       Object.entries(precomputed.concepts).forEach(([cid, cr]) => {
-        const sims: number[] = [];
+        // Collect concept's top neurons across all its words
+        const conceptNeurons = new Map<string, number>();
         cr.words.forEach((w) => {
           const layer = w.layers.find((l) => l.layer === selectedLayer);
           if (!layer) return;
-          const vec = layer.heads.flatMap((h) => h.x_ds);
-          sims.push(cosine(avgUser, vec));
-        });
-        if (sims.length > 0)
-          overlaps.push({
-            concept: cid,
-            similarity: sims.reduce((a, b) => a + b, 0) / sims.length,
+          layer.heads.forEach((h) => {
+            (h.top_neurons ?? []).forEach((n) => {
+              const key = `${h.head}:${n.idx}`;
+              const val = Math.abs(n.raw ?? n.val);
+              conceptNeurons.set(
+                key,
+                Math.max(conceptNeurons.get(key) ?? 0, val),
+              );
+            });
           });
+        });
+
+        // Sparse cosine similarity over neuron indices
+        let dot = 0,
+          normU = 0,
+          normC = 0;
+        userNeurons.forEach((uVal, key) => {
+          normU += uVal * uVal;
+          const cVal = conceptNeurons.get(key);
+          if (cVal !== undefined) dot += uVal * cVal;
+        });
+        conceptNeurons.forEach((cVal) => (normC += cVal * cVal));
+        const denom = Math.sqrt(normU) * Math.sqrt(normC);
+        const sim = denom > 0 ? dot / denom : 0;
+
+        overlaps.push({ concept: cid, similarity: sim });
       });
       overlaps.sort((a, b) => b.similarity - a.similarity);
       return overlaps;

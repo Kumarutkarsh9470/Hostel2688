@@ -230,8 +230,25 @@ class ModelService:
             self._load_order.append(model_name)
 
             # Store heritage info for merged models
-            if "heritage" in checkpoint:
-                self._model_heritage[model_name] = checkpoint["heritage"]
+            heritage_raw = checkpoint.get("heritage")
+            if heritage_raw:
+                # Normalise old-style keys (model_a/model_b/neurons_a)
+                # to the canonical names the API routes expect.
+                if "neurons_per_head_original" not in heritage_raw:
+                    heritage_raw = {
+                        "model1_name": heritage_raw.get("model_a", "french"),
+                        "model2_name": heritage_raw.get("model_b", "portuguese"),
+                        "neurons_per_head_original": heritage_raw.get("neurons_a", config.n_neurons),
+                        "neurons_per_head_merged": heritage_raw.get("total", config.n_neurons * 2),
+                    }
+                self._model_heritage[model_name] = heritage_raw
+            else:
+                # Fallback: try loading the standalone heritage JSON
+                heritage_json = self.checkpoint_dir.parent / "merged_model.heritage.json"
+                if heritage_json.exists() and "merge" in model_name:
+                    import json
+                    with open(heritage_json) as f:
+                        self._model_heritage[model_name] = json.load(f)
 
             print(f"Loaded: {config.n_layer}L, {config.n_embd}D, {config.n_head}H, "
                   f"N={config.n_neurons}")

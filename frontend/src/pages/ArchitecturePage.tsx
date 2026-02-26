@@ -10,6 +10,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { BDHArchitectureDiagram } from "@/features/architecture/BDHArchitectureDiagram";
+import { MathDetailPanel } from "@/features/architecture/MathDetailPanel";
 import { usePlaybackStore } from "@/stores/playbackStore";
 
 // Must match STEPS in BDHArchitectureDiagram
@@ -26,6 +27,7 @@ export function ArchitecturePage() {
   const [currentTokenIdx, setCurrentTokenIdx] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [, setStepProgress] = useState(0);
+  const [selectedBlock, setSelectedBlock] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stepStartRef = useRef<number>(0);
 
@@ -465,21 +467,40 @@ export function ArchitecturePage() {
         )}
       </motion.div>
 
-      {/* Main Diagram */}
+      {/* Main Diagram + Detail Panel */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         className="glass-card p-6 mb-6 overflow-x-auto"
       >
-        <BDHArchitectureDiagram
-          frameData={currentFrameData}
-          playbackData={playbackData ?? undefined}
-          currentLayer={currentLayer}
-          isAnimating={isPlaying}
-          currentStep={currentStep}
-          onStepChange={handleStepClick}
-        />
+        <div className="flex gap-4">
+          <div
+            className={`flex-1 min-w-0 transition-all duration-300 ${selectedBlock !== null ? "" : ""}`}
+          >
+            <BDHArchitectureDiagram
+              frameData={currentFrameData}
+              playbackData={playbackData ?? undefined}
+              currentLayer={currentLayer}
+              isAnimating={isPlaying}
+              currentStep={currentStep}
+              onStepChange={handleStepClick}
+              selectedBlock={selectedBlock}
+              onBlockClick={(step) =>
+                setSelectedBlock((prev) => (prev === step ? null : step))
+              }
+            />
+          </div>
+          {selectedBlock !== null && (
+            <MathDetailPanel
+              selectedBlock={selectedBlock}
+              onClose={() => setSelectedBlock(null)}
+              frameData={currentFrameData}
+              playbackData={playbackData ?? undefined}
+              currentLayer={currentLayer}
+            />
+          )}
+        </div>
       </motion.div>
 
       {/* Layer selector */}

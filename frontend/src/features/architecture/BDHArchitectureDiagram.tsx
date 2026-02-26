@@ -94,6 +94,8 @@ interface Props {
   isAnimating: boolean;
   currentStep?: number;
   onStepChange?: (step: number) => void;
+  selectedBlock?: number | null;
+  onBlockClick?: (step: number) => void;
 }
 
 // =============================================================================
@@ -172,6 +174,8 @@ export function BDHArchitectureDiagram({
   isAnimating,
   currentStep: externalStep,
   onStepChange,
+  selectedBlock,
+  onBlockClick,
 }: Props) {
   const [internalStep, setInternalStep] = useState(0);
   const [fillProgress, setFillProgress] = useState(1);
@@ -392,6 +396,8 @@ export function BDHArchitectureDiagram({
               isActive={isActive(1)}
               isCurrent={isCurrent(1) && isAnimating}
               progress={getProgress(1)}
+              isSelected={selectedBlock === 1}
+              onClick={() => onBlockClick?.(1)}
             >
               {isActive(1) && frameData?.embedding ? (
                 <g>
@@ -474,6 +480,8 @@ export function BDHArchitectureDiagram({
               isActive={isActive(2)}
               isCurrent={isCurrent(2) && isAnimating}
               progress={getProgress(2)}
+              isSelected={selectedBlock === 2}
+              onClick={() => onBlockClick?.(2)}
             >
               {isActive(2) &&
               frameData?.embedding?.pre_ln_ds &&
@@ -634,6 +642,8 @@ export function BDHArchitectureDiagram({
               isCurrent={isCurrent(3) && isAnimating}
               progress={getProgress(3)}
               shape="trapezoid"
+              isSelected={selectedBlock === 3}
+              onClick={() => onBlockClick?.(3)}
             >
               {isActive(3) && frameData?.x_pre_relu?.histogram ? (
                 <g>
@@ -715,6 +725,8 @@ export function BDHArchitectureDiagram({
               isActive={isActive(4)}
               isCurrent={isCurrent(4) && isAnimating}
               progress={getProgress(4)}
+              isSelected={selectedBlock === 4}
+              onClick={() => onBlockClick?.(4)}
             >
               {isActive(4) && frameData?.x_activation_grid ? (
                 <g>
@@ -926,6 +938,8 @@ export function BDHArchitectureDiagram({
               isActive={isActive(5)}
               isCurrent={isCurrent(5) && isAnimating}
               progress={getProgress(5)}
+              isSelected={selectedBlock === 5}
+              onClick={() => onBlockClick?.(5)}
             >
               <text
                 x={RW / 2}
@@ -1018,6 +1032,8 @@ export function BDHArchitectureDiagram({
               isActive={isActive(6)}
               isCurrent={isCurrent(6) && isAnimating}
               progress={getProgress(6)}
+              isSelected={selectedBlock === 6}
+              onClick={() => onBlockClick?.(6)}
             >
               <text
                 x={RW / 2}
@@ -1096,6 +1112,8 @@ export function BDHArchitectureDiagram({
               isCurrent={isCurrent(7) && isAnimating}
               progress={getProgress(7)}
               shape="trapezoid"
+              isSelected={selectedBlock === 7}
+              onClick={() => onBlockClick?.(7)}
             >
               {isActive(7) && frameData?.y_pre_relu?.histogram ? (
                 <g>
@@ -1177,6 +1195,8 @@ export function BDHArchitectureDiagram({
               isActive={isActive(8)}
               isCurrent={isCurrent(8) && isAnimating}
               progress={getProgress(8)}
+              isSelected={selectedBlock === 8}
+              onClick={() => onBlockClick?.(8)}
             >
               {isActive(8) && frameData?.y_activation_grid ? (
                 <g>
@@ -1337,15 +1357,30 @@ export function BDHArchitectureDiagram({
           {/* ================================================================ */}
 
           {/* ===== HADAMARD (y=1105) ===== */}
-          <g transform={`translate(${CX - 65}, 1105)`}>
+          <g
+            transform={`translate(${CX - 65}, 1105)`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBlockClick?.(9);
+            }}
+            style={{ cursor: onBlockClick ? "pointer" : undefined }}
+          >
             <motion.circle
               cx={65}
               cy={30}
               r={30}
               fill={isActive(9) ? "#164E63" : "#1F2937"}
-              stroke={isActive(9) ? "#06B6D4" : "#374151"}
-              strokeWidth={isActive(9) ? 2.5 : 1.2}
-              strokeDasharray={isActive(9) ? undefined : "6 4"}
+              stroke={
+                selectedBlock === 9
+                  ? "#00C896"
+                  : isActive(9)
+                    ? "#06B6D4"
+                    : "#374151"
+              }
+              strokeWidth={selectedBlock === 9 ? 3 : isActive(9) ? 2.5 : 1.2}
+              strokeDasharray={
+                isActive(9) || selectedBlock === 9 ? undefined : "6 4"
+              }
               animate={
                 isCurrent(9) && isAnimating ? { scale: [1, 1.05, 1] } : {}
               }
@@ -1420,6 +1455,8 @@ export function BDHArchitectureDiagram({
               isCurrent={isCurrent(10) && isAnimating}
               progress={getProgress(10)}
               shape="trapezoidInv"
+              isSelected={selectedBlock === 10}
+              onClick={() => onBlockClick?.(10)}
             >
               {isActive(10) && frameData?.hadamard_grid ? (
                 <g>
@@ -1521,15 +1558,30 @@ export function BDHArchitectureDiagram({
           />
 
           {/* ===== RESIDUAL (y=1480) ===== */}
-          <g transform={`translate(${CX - 28}, 1480)`}>
+          <g
+            transform={`translate(${CX - 28}, 1480)`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBlockClick?.(11);
+            }}
+            style={{ cursor: onBlockClick ? "pointer" : undefined }}
+          >
             <motion.circle
               cx={28}
               cy={22}
               r={22}
               fill={isActive(11) ? "#312E81" : "#1F2937"}
-              stroke={isActive(11) ? "#8B5CF6" : "#374151"}
-              strokeWidth={isActive(11) ? 2.5 : 1.2}
-              strokeDasharray={isActive(11) ? undefined : "6 4"}
+              stroke={
+                selectedBlock === 11
+                  ? "#00C896"
+                  : isActive(11)
+                    ? "#8B5CF6"
+                    : "#374151"
+              }
+              strokeWidth={selectedBlock === 11 ? 3 : isActive(11) ? 2.5 : 1.2}
+              strokeDasharray={
+                isActive(11) || selectedBlock === 11 ? undefined : "6 4"
+              }
               animate={
                 isCurrent(11) && isAnimating ? { scale: [1, 1.05, 1] } : {}
               }
@@ -1587,7 +1639,14 @@ export function BDHArchitectureDiagram({
 
           {/* ===== OUTPUT PREDICTIONS ===== */}
           {isActive(12) && predictions && (
-            <g transform={`translate(${CX - 270}, 1570)`}>
+            <g
+              transform={`translate(${CX - 270}, 1570)`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onBlockClick?.(12);
+              }}
+              style={{ cursor: onBlockClick ? "pointer" : undefined }}
+            >
               <text
                 x="270"
                 y="0"
@@ -2081,6 +2140,8 @@ interface ArchBoxProps {
   progress: number;
   shape?: "rect" | "trapezoid" | "trapezoidInv";
   children?: React.ReactNode;
+  isSelected?: boolean;
+  onClick?: () => void;
 }
 
 function ArchBox({
@@ -2093,6 +2154,8 @@ function ArchBox({
   progress,
   shape = "rect",
   children,
+  isSelected,
+  onClick,
 }: ArchBoxProps) {
   const offset = 15;
   const getPath = () => {
@@ -2110,7 +2173,13 @@ function ArchBox({
   const clipId = `clip-${title.replace(/\s+/g, "-")}-${Math.random().toString(36).substr(2, 5)}`;
 
   return (
-    <g>
+    <g
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+      style={{ cursor: onClick ? "pointer" : undefined }}
+    >
       <path d={getPath()} fill="#111827" stroke="#1F2937" strokeWidth="1" />
       <defs>
         <clipPath id={clipId}>
@@ -2129,10 +2198,29 @@ function ArchBox({
       <path
         d={getPath()}
         fill="none"
-        stroke={isActive ? "#8B5CF6" : "#374151"}
-        strokeWidth={isActive ? 2 : 1}
-        strokeDasharray={isActive ? undefined : "6 4"}
+        stroke={isSelected ? "#00C896" : isActive ? "#8B5CF6" : "#374151"}
+        strokeWidth={isSelected ? 3 : isActive ? 2 : 1}
+        strokeDasharray={isActive || isSelected ? undefined : "6 4"}
       />
+      {/* Selected glow */}
+      {isSelected && (
+        <path
+          d={getPath()}
+          fill="none"
+          stroke="#00C896"
+          strokeWidth="1"
+          opacity="0.3"
+          strokeDasharray="4 4"
+        >
+          <animate
+            attributeName="stroke-dashoffset"
+            from="8"
+            to="0"
+            dur="0.6s"
+            repeatCount="indefinite"
+          />
+        </path>
+      )}
       {/* Title bar */}
       <rect
         x="1"
@@ -2148,9 +2236,9 @@ function ArchBox({
         y1="27"
         x2={width - 1}
         y2="27"
-        stroke={isActive ? "#6D28D9" : "#374151"}
+        stroke={isSelected ? "#00C896" : isActive ? "#6D28D9" : "#374151"}
         strokeWidth="1"
-        opacity={isActive ? 0.6 : 0.3}
+        opacity={isSelected ? 0.8 : isActive ? 0.6 : 0.3}
       />
       {/* Computing shimmer — animated scan line when current step */}
       {isCurrent && (
@@ -2200,7 +2288,7 @@ function ArchBox({
         x={width / 2}
         y="19"
         textAnchor="middle"
-        fill={isActive ? "#F3F4F6" : "#6B7280"}
+        fill={isSelected ? "#00C896" : isActive ? "#F3F4F6" : "#6B7280"}
         fontSize="15"
         fontWeight="bold"
       >

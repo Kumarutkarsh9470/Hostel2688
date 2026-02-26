@@ -366,7 +366,15 @@ export function MergePage() {
       (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
       "";
     fetch(`${apiOrigin}/health`)
-      .then((r) => (r.ok ? setBackendAvailable(true) : null))
+      .then(async (r) => {
+        if (!r.ok) return;
+        try {
+          const j = await r.json();
+          if (j && j.status === "healthy") setBackendAvailable(true);
+        } catch {
+          // Response wasn't JSON (e.g. nginx SPA fallback HTML) — not a real backend
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -651,21 +659,22 @@ function ModelCards({
                 value={`${m.n_layers} x ${m.n_heads}`}
               />
               <Row label="Embedding dim" value={String(m.n_embd)} />
-              {ev && (ev.french_loss !== null || ev.portuguese_loss !== null) && (
-                <>
-                  <div className="border-t border-white/[0.06] my-2" />
-                  <Row
-                    label="French loss"
-                    value={lossDisplay(ev.french_loss)}
-                    valueClass={lossColor(ev.french_loss)}
-                  />
-                  <Row
-                    label="Portuguese loss"
-                    value={lossDisplay(ev.portuguese_loss)}
-                    valueClass={lossColor(ev.portuguese_loss)}
-                  />
-                </>
-              )}
+              {ev &&
+                (ev.french_loss !== null || ev.portuguese_loss !== null) && (
+                  <>
+                    <div className="border-t border-white/[0.06] my-2" />
+                    <Row
+                      label="French loss"
+                      value={lossDisplay(ev.french_loss)}
+                      valueClass={lossColor(ev.french_loss)}
+                    />
+                    <Row
+                      label="Portuguese loss"
+                      value={lossDisplay(ev.portuguese_loss)}
+                      valueClass={lossColor(ev.portuguese_loss)}
+                    />
+                  </>
+                )}
             </div>
           </motion.div>
         );
@@ -983,7 +992,10 @@ function HeritageProbe({
           body: JSON.stringify({ text, model_name: model }),
         });
       }
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok)
+        throw new Error(
+          "Backend unavailable – heritage probe requires a running API server.",
+        );
       setResult(await res.json());
     } catch (e: any) {
       setError(e.message || "Probe failed");
@@ -1176,8 +1188,18 @@ function LiveGeneration({ backendAvailable }: { backendAvailable: boolean }) {
       if (r.ok) {
         const d = await r.json();
         setGens(d.generations);
+      } else {
+        setGens({
+          _error:
+            "Backend unavailable – live generation requires a running API server.",
+        });
       }
-    } catch {}
+    } catch {
+      setGens({
+        _error:
+          "Backend unavailable – live generation requires a running API server.",
+      });
+    }
     setGenerating(false);
   }, [prompt]);
 
@@ -1244,24 +1266,31 @@ function LiveGeneration({ backendAvailable }: { backendAvailable: boolean }) {
       </div>
       {Object.keys(gens).length > 0 && (
         <div className="space-y-2">
-          {Object.entries(gens).map(([name, text]) => {
-            const _c2 = colors[name] || "zinc";
-            void _c2;
-            return (
-              <div
-                key={name}
-                className="bg-[#0B1216]/50 rounded-lg p-3 border border-white/[0.06]"
-              >
-                <span className="text-xs font-medium text-[#CBD5E0] mb-1 block">
-                  {labels[name] || name}
-                </span>
-                <p className="font-mono text-sm text-[#CBD5E0] break-all">
-                  <span className="text-[#CBD5E0]">{prompt}</span>
-                  <span className="text-[#8B95A5]">{text}</span>
-                </p>
-              </div>
-            );
-          })}
+          {"_error" in gens ? (
+            <div className="bg-[#0B1216]/50 rounded-lg p-3 border border-white/[0.06] text-sm text-[#8B95A5]">
+              <Terminal className="w-4 h-4 inline mr-2" />
+              {gens._error}
+            </div>
+          ) : (
+            Object.entries(gens).map(([name, text]) => {
+              const _c2 = colors[name] || "zinc";
+              void _c2;
+              return (
+                <div
+                  key={name}
+                  className="bg-[#0B1216]/50 rounded-lg p-3 border border-white/[0.06]"
+                >
+                  <span className="text-xs font-medium text-[#CBD5E0] mb-1 block">
+                    {labels[name] || name}
+                  </span>
+                  <p className="font-mono text-sm text-[#CBD5E0] break-all">
+                    <span className="text-[#CBD5E0]">{prompt}</span>
+                    <span className="text-[#8B95A5]">{text}</span>
+                  </p>
+                </div>
+              );
+            })
+          )}
         </div>
       )}
     </motion.div>

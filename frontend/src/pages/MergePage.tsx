@@ -122,7 +122,9 @@ const lossColor = (v: number | null) =>
         ? "text-amber-400"
         : "text-red-400";
 const lossDisplay = (v: number | null) => (v === null ? "—" : v.toFixed(4));
-const API = "/api/merge";
+const API_ORIGIN =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) || "";
+const API = `${API_ORIGIN}/api/merge`;
 
 /* ================================================================== */
 /*  Training Evolution — side-by-side loss + sparsity curves           */
@@ -362,10 +364,7 @@ export function MergePage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-    const apiOrigin =
-      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
-      "";
-    fetch(`${apiOrigin}/health`)
+    fetch(`${API_ORIGIN}/health`)
       .then(async (r) => {
         if (!r.ok) return;
         try {

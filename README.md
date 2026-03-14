@@ -1,5 +1,7 @@
 # BDH Interpretability Suite
 
+DEMO Link - https://youtu.be/Mlw_ITRiuyc?si=lQbud51_9Ua69HBG
+
 **KRITI 2026 -- AI Interpretability Challenge |**
 
 An interactive visualization and interpretability platform for the BDH (Baby Dragon Hatchling) post-transformer architecture. This project delivers a complete pipeline: training BDH models from scratch on multilingual data, extracting every internal signal the architecture exposes, and rendering those signals in a 9-page interactive frontend with live backend inference.

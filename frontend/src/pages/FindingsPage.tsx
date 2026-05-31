@@ -795,7 +795,7 @@ function SigmaReplay({
 
       {/* Value display */}
       <div className="text-center">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.span
             key={step}
             initial={{ opacity: 0, y: 6 }}

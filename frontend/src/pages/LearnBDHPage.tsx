@@ -1172,7 +1172,7 @@ export function LearnBDHPage() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={step.id}
             initial={{ opacity: 0, y: 8 }}

@@ -188,7 +188,7 @@ export function MathDetailPanel({
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <motion.div
         key={selectedBlock}
         initial={{ opacity: 0, x: 30 }}

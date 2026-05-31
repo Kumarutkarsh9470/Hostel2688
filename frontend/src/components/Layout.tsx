@@ -204,7 +204,7 @@ export function Layout() {
 
         {/* Page content — each page handles its own entry animation */}
         <div className="flex-1" style={{ minHeight: 0 }}>
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="sync">
             <motion.div
               key={location.pathname}
               initial={{ opacity: 0, y: 8 }}

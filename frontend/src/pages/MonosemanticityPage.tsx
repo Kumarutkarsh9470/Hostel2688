@@ -3160,7 +3160,7 @@ export function MonosemanticityPage() {
 
       {/* Active view */}
       <div className="mb-6">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {viewTab === "similarity" && (
             <motion.div
               key="sim"

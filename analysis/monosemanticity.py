@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """Monosemanticity analysis — discovers concept-specific synapses in BDH models."""
 
 import argparse
